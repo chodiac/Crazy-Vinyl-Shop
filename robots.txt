@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://crazyvinylshop.rs/sitemap.xml

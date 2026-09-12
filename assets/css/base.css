@@ -1,0 +1,444 @@
+/* ==========================================================================
+   CRAZY VINYL SHOP — base layer
+   Tokens, reset, typography, grid, print texture, utilities.
+   Palette is taken from the live crazyvinylshop.rs theme:
+     #DF6F51 terracotta (CTA)  #FBB040 amber  #EF4136 red
+     #F3F3F3 bone  #18181B / #212125 / #35343E dark surfaces
+   Supporting kraft/board tones are new, inspired by record sleeve cardboard.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  /* ---- ink (vinyl) ---- */
+  --ink: #0e0e10;
+  --ink-2: #16161a;
+  --ink-3: #1f1f24;
+  --ink-4: #2a2a31;
+  --ink-5: #35343e;
+
+  /* ---- bone (print on black) ---- */
+  --bone: #f3f3f3;
+  --bone-80: rgba(243, 243, 243, .8);
+  --bone-60: rgba(243, 243, 243, .6);
+  --bone-40: rgba(243, 243, 243, .4);
+  --bone-20: rgba(243, 243, 243, .2);
+  --bone-12: rgba(243, 243, 243, .12);
+  --bone-08: rgba(243, 243, 243, .08);
+
+  /* ---- paper (printed inner sleeve) ---- */
+  --paper: #e7dcc4;
+  --paper-2: #dbcdb0;
+  --board: #c6b594;
+  --paper-ink: #17140e;
+  --paper-ink-60: rgba(23, 20, 14, .6);
+  --paper-ink-40: rgba(23, 20, 14, .4);
+  --paper-ink-16: rgba(23, 20, 14, .16);
+
+  /* ---- brand accents ---- */
+  --terra: #df6f51;
+  --terra-dark: #b8563c;
+  --amber: #fbb040;
+  --red: #ef4136;
+
+  /* ---- type ---- */
+  --ff: 'Archivo', 'Archivo Black', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --ff-mono: 'Space Mono', ui-monospace, 'Courier New', monospace;
+
+  --step--2: clamp(.66rem, .64rem + .1vw, .72rem);
+  --step--1: clamp(.78rem, .75rem + .15vw, .86rem);
+  --step-0: clamp(.94rem, .9rem + .2vw, 1.02rem);
+  --step-1: clamp(1.1rem, 1.02rem + .4vw, 1.35rem);
+  --step-2: clamp(1.35rem, 1.18rem + .8vw, 1.9rem);
+  --step-3: clamp(1.7rem, 1.35rem + 1.6vw, 2.9rem);
+  --step-4: clamp(2.1rem, 1.5rem + 2.8vw, 4.4rem);
+  --step-5: clamp(2.6rem, 1.5rem + 5vw, 6.8rem);
+
+  /* ---- layout ---- */
+  --gut: clamp(1rem, .6rem + 2vw, 2.5rem);
+  --maxw: 1680px;
+  --rule: 1px solid var(--bone-12);
+  --rule-paper: 1px solid var(--paper-ink-16);
+
+  /* ---- motion ---- */
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --ease-io: cubic-bezier(.6, 0, .2, 1);
+  --dur: .5s;
+
+  --header-h: 68px;
+  color-scheme: dark;
+}
+
+@media (min-width: 1024px) {
+  :root { --header-h: 84px; }
+}
+
+/* ==========================================================================
+   reset
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  /* keep the sticky header from covering in-page anchors */
+  scroll-padding-top: calc(var(--header-h) + 1rem);
+  /* The off-canvas drawer, mobile menu and filter sheet are fixed-position and
+     parked outside the right edge, so they escape any clip set on <body>.
+     Clipping at the root contains them without creating a scroll container. */
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--bone);
+  font-family: var(--ff);
+  font-size: var(--step-0);
+  font-variation-settings: 'wdth' 100, 'wght' 420;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* clip, not hidden: hidden would turn <body> into a scroll container and
+     break the sticky header and sticky hero stage. */
+  overflow-x: clip;
+}
+
+body.is-locked { overflow: hidden; }
+
+h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd, ul, ol { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+img, svg, video { display: block; max-width: 100%; }
+img { height: auto; }
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+}
+
+button { cursor: pointer; }
+
+a { color: inherit; text-decoration: none; }
+
+a:where(:not([class])) {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: .22em;
+  text-decoration-color: var(--terra);
+}
+
+/* visible, branded focus ring everywhere */
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+::selection { background: var(--terra); color: var(--ink); }
+
+/* ==========================================================================
+   typography roles
+   ========================================================================== */
+
+/* Ultra-condensed poster stack — the loudest voice on the site. */
+.t-stack {
+  font-family: var(--ff);
+  font-variation-settings: 'wdth' 64, 'wght' 900;
+  font-size: var(--step-5);
+  line-height: .82;
+  letter-spacing: -.005em;
+  text-transform: uppercase;
+}
+
+/* Wide editorial display — section titles. */
+.t-display {
+  font-variation-settings: 'wdth' 112, 'wght' 850;
+  font-size: var(--step-3);
+  line-height: .96;
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+}
+
+.t-display--lg { font-size: var(--step-4); }
+
+.t-sub {
+  font-variation-settings: 'wdth' 100, 'wght' 700;
+  font-size: var(--step-1);
+  line-height: 1.2;
+  letter-spacing: -.01em;
+}
+
+/* Printed-on-the-sleeve metadata. */
+.t-meta {
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+.t-meta--sm { font-size: var(--step--2); letter-spacing: .14em; }
+
+.t-body { max-width: 62ch; }
+.t-body p + p { margin-top: .9em; }
+
+/* Eyebrow: catalogue code + label, separated by a needle rule. */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  font-family: var(--ff-mono);
+  font-size: var(--step--2);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--terra);
+}
+
+.eyebrow::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  opacity: .4;
+}
+
+.eyebrow--paper { color: var(--terra-dark); }
+
+/* Print misregistration: a terracotta ghost sits behind the headline, the way
+   a mis-aligned second pass looks on cheap sleeve printing. */
+.misreg {
+  position: relative;
+  display: inline-block;
+}
+
+.misreg::before {
+  content: attr(data-ghost);
+  position: absolute;
+  inset: 0;
+  color: var(--terra);
+  transform: translate(.09em, .055em);
+  z-index: -1;
+  opacity: .85;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   layout
+   ========================================================================== */
+
+.wrap {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gut);
+}
+
+.wrap--narrow { max-width: 1100px; }
+.wrap--text { max-width: 820px; }
+
+.section { padding-block: clamp(3.5rem, 2rem + 6vw, 8rem); }
+.section--tight { padding-block: clamp(2.25rem, 1.5rem + 3vw, 4rem); }
+
+/* Paper sections invert the whole palette — the printed inner sleeve. */
+.paper {
+  background: var(--paper);
+  color: var(--paper-ink);
+}
+
+.paper .eyebrow { color: var(--terra-dark); }
+.paper a:where(:not([class])) { text-decoration-color: var(--terra-dark); }
+.paper ::selection { background: var(--paper-ink); color: var(--paper); }
+
+.board { background: var(--board); color: var(--paper-ink); }
+
+.rule-top { border-top: var(--rule); }
+.rule-bottom { border-bottom: var(--rule); }
+.paper .rule-top, .paper .rule-bottom { border-color: var(--paper-ink-16); }
+
+/* ==========================================================================
+   print texture — one SVG grain, kept faint so type stays crisp
+   ========================================================================== */
+
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  pointer-events: none;
+  opacity: .5;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.42'/%3E%3C/svg%3E");
+}
+
+/* ==========================================================================
+   buttons
+   ========================================================================== */
+
+.btn {
+  --btn-bg: var(--terra);
+  --btn-fg: var(--ink);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  padding: .95em 1.6em;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  border: 1px solid var(--btn-bg);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease),
+              transform .2s var(--ease), border-color var(--dur) var(--ease);
+}
+
+.btn:hover { background: var(--bone); border-color: var(--bone); color: var(--ink); }
+.btn:active { transform: translateY(1px); }
+
+.btn--ghost {
+  --btn-bg: transparent;
+  --btn-fg: var(--bone);
+  border-color: var(--bone-40);
+}
+
+.btn--ghost:hover { background: var(--bone); color: var(--ink); }
+
+.paper .btn--ghost { --btn-fg: var(--paper-ink); border-color: var(--paper-ink-40); }
+.paper .btn--ghost:hover { background: var(--paper-ink); color: var(--paper); border-color: var(--paper-ink); }
+
+.btn--sale { --btn-bg: var(--red); --btn-fg: var(--bone); }
+.btn--sale:hover { background: var(--amber); border-color: var(--amber); color: var(--ink); }
+
+.btn--block { width: 100%; }
+
+.btn[disabled], .btn[aria-disabled='true'] {
+  background: var(--ink-4);
+  border-color: var(--ink-4);
+  color: var(--bone-40);
+  cursor: not-allowed;
+}
+
+.btn[disabled]:hover, .btn[aria-disabled='true']:hover {
+  background: var(--ink-4);
+  border-color: var(--ink-4);
+  color: var(--bone-40);
+}
+
+/* Text link that behaves like a catalogue reference. */
+.link-cat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .5rem;
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: .15em;
+  transition: color var(--dur) var(--ease), gap .3s var(--ease);
+}
+
+.link-cat:hover { color: var(--terra); gap: .85rem; }
+.paper .link-cat:hover { color: var(--terra-dark); }
+
+/* ==========================================================================
+   price sticker — an old shop price label, slightly askew
+   ========================================================================== */
+
+.sticker {
+  display: inline-block;
+  padding: .3em .6em;
+  background: var(--amber);
+  color: var(--ink);
+  font-family: var(--ff-mono);
+  font-weight: 700;
+  font-size: var(--step--1);
+  letter-spacing: .04em;
+  transform: rotate(-1.6deg);
+}
+
+.sticker--sale { background: var(--red); color: var(--bone); }
+
+/* ==========================================================================
+   utilities
+   ========================================================================== */
+
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: 0; left: 50%;
+  translate: -50% -120%;
+  z-index: 9999;
+  padding: .75rem 1.25rem;
+  background: var(--amber);
+  color: var(--ink);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  transition: translate .25s var(--ease);
+}
+
+.skip-link:focus-visible { translate: -50% 0; }
+
+.stack > * + * { margin-top: var(--sp, 1rem); }
+.text-terra { color: var(--terra); }
+.text-amber { color: var(--amber); }
+.text-red { color: var(--red); }
+.text-dim { color: var(--bone-60); }
+.paper .text-dim { color: var(--paper-ink-60); }
+.nowrap { white-space: nowrap; }
+
+/* ==========================================================================
+   scroll reveal — masked, so headings wipe up like a sleeve leaving a crate
+   ========================================================================== */
+
+.reveal { overflow: hidden; }
+
+.reveal > * {
+  display: block;
+  transform: translateY(105%);
+  will-change: transform;
+}
+
+.fade-up {
+  opacity: 0;
+  transform: translateY(28px);
+  will-change: transform, opacity;
+}
+
+/* If JS never runs, nothing may stay hidden. */
+.no-js .reveal > *,
+.no-js .fade-up { transform: none; opacity: 1; }
+
+/* Reduced motion.
+   The `rm` class is set in the document head from prefers-reduced-motion, so
+   the same switch drives both CSS and JS — and `?motion=1` can force the full
+   experience on for review without touching the user's real setting. */
+:root.rm { scroll-behavior: auto; }
+
+:root.rm *, :root.rm *::before, :root.rm *::after {
+  animation-duration: .001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: .001ms !important;
+}
+
+:root.rm .reveal > *,
+:root.rm .fade-up { transform: none !important; opacity: 1 !important; }
+:root.rm .grain { display: none; }

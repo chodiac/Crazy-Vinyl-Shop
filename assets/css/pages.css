@@ -1,0 +1,1167 @@
+/* ==========================================================================
+   CRAZY VINYL SHOP — page layers
+   hero + vinyl aperture transition · category heroes · product detail
+   cart page · checkout · contact · privacy
+   ========================================================================== */
+
+/* ==========================================================================
+   HOME — hero rig
+   A tall scroll track with a sticky stage. Progress across the track moves the
+   record to centre, spins it up, clips the wordmark away, then opens the
+   spindle hole into a circular aperture onto the shop.
+   ========================================================================== */
+
+.hero-rig {
+  position: relative;
+  height: 260vh;
+  background: var(--ink);
+}
+
+.hero-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  display: grid;
+  isolation: isolate;
+}
+
+/* ambient lamp glow behind the record */
+.hero-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(58% 62% at 74% 46%, rgba(223, 111, 81, .2) 0%, transparent 70%),
+    radial-gradient(40% 50% at 18% 18%, rgba(251, 176, 64, .1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Above the record: the wordmark must never be covered by it. */
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding: calc(var(--header-h) + clamp(1rem, .5rem + 2vw, 2.5rem)) var(--gut) clamp(1.5rem, 1rem + 2vw, 3rem);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: clamp(1rem, .5rem + 1.5vw, 2rem);
+  align-content: space-between;
+}
+
+/* --- top rail: sleeve-print metadata --- */
+
+.hero-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem 1.25rem;
+  align-items: baseline;
+  font-family: var(--ff-mono);
+  font-size: var(--step--2);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--bone-40);
+  border-bottom: var(--rule);
+  padding-bottom: .7rem;
+}
+
+.hero-rail b { color: var(--terra); font-weight: 700; }
+
+/* --- the wordmark stack --- */
+
+.hero-type { position: relative; z-index: 2; align-self: center; }
+
+/* Tied to height as well as width so three lines always clear the fold. */
+.hero-word {
+  font-variation-settings: 'wdth' 62, 'wght' 900;
+  font-size: min(clamp(3.4rem, .5rem + 16vw, 14rem), 20vh);
+  line-height: .8;
+  letter-spacing: -.015em;
+  text-transform: uppercase;
+  display: grid;
+  will-change: transform;
+}
+
+.hero-word__line { display: block; overflow: hidden; }
+.hero-word__line > span { display: block; will-change: transform; }
+.hero-word__line:nth-child(2) > span { color: var(--terra); }
+
+.hero-lede {
+  max-width: 34ch;
+  padding-top: clamp(.75rem, .4rem + 1vw, 1.4rem);
+  font-size: var(--step-0);
+  color: var(--bone-60);
+}
+
+/* --- bottom rail: CTAs --- */
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-scroll {
+  display: none;
+  font-family: var(--ff-mono);
+  font-size: var(--step--2);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--bone-40);
+  margin-inline-start: auto;
+  align-items: center;
+  gap: .6rem;
+}
+
+@media (min-width: 860px) { .hero-scroll { display: flex; } }
+
+.hero-scroll__line {
+  display: block;
+  width: 46px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--bone-40), transparent);
+  animation: needle 2.4s var(--ease-io) infinite;
+}
+
+@keyframes needle {
+  0%, 100% { transform: translateX(0); opacity: .5; }
+  50% { transform: translateX(10px); opacity: 1; }
+}
+
+/* --- the record --- */
+
+/* Offset and scale are animated as custom properties so the transition stays
+   on the compositor and the no-JS resting position still reads correctly. */
+.hero-disc {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  width: min(126vh, 92vw);
+  /* --disc-x is a unitless number of vw and --disc-s a plain ratio, so the
+     scroll timeline only ever interpolates numbers */
+  translate: calc(-50% + var(--disc-x, 22) * 1vw) -50%;
+  scale: var(--disc-s, 1);
+  will-change: translate, scale;
+  pointer-events: none;
+}
+
+@media (max-width: 860px) {
+  .hero-disc {
+    top: 54%;
+    width: min(112vh, 112vw);
+    translate: calc(-50% + var(--disc-x, 14) * 1vw) -50%;
+    opacity: .92;
+  }
+
+  .hero-word { font-size: min(clamp(2.8rem, 1rem + 15vw, 7rem), 17vh); }
+}
+
+/* --- the aperture: the spindle hole opening onto the shop --- */
+
+.aperture {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  clip-path: circle(calc(var(--ap, 0) * 1%) at 50% 50%);
+  will-change: clip-path;
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 50% 46%,
+      rgba(223, 111, 81, .08),
+      transparent 42%
+    ),
+    #d7c9ac;
+}
+
+/* veliki suptilni vinyl u pozadini */
+.aperture::before {
+  content: '';
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  width: min(72vw, 1050px);
+  aspect-ratio: 1;
+
+  translate: -50% -50%;
+  scale: 1;
+
+  border-radius: 50%;
+
+  opacity: .045;
+  pointer-events: none;
+
+  background:
+    radial-gradient(circle at center,
+      transparent 0 8%,
+      rgba(23,20,14,.8) 8.3% 8.7%,
+      transparent 9% 18%,
+      rgba(23,20,14,.55) 18.3% 18.6%,
+      transparent 18.9% 28%,
+      rgba(23,20,14,.45) 28.2% 28.5%,
+      transparent 28.8% 38%,
+      rgba(23,20,14,.38) 38.2% 38.5%,
+      transparent 38.8% 48%,
+      rgba(23,20,14,.32) 48.2% 48.5%,
+      transparent 48.8% 58%,
+      rgba(23,20,14,.28) 58.2% 58.5%,
+      transparent 58.8% 68%,
+      rgba(23,20,14,.24) 68.2% 68.5%,
+      transparent 68.8%
+    );
+
+  animation: aperturePulse 5.5s ease-in-out infinite;
+}
+
+
+@keyframes aperturePulse {
+  0%,
+  100% {
+    scale: 1;
+    opacity: .045;
+  }
+
+  50% {
+    scale: 1.035;
+    opacity: .085;
+  }
+}
+
+.aperture__inner {
+  position: relative;
+  z-index: 2;
+
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gut);
+
+  display: grid;
+  gap: clamp(.75rem, .4rem + 1vw, 1.5rem);
+  text-align: center;
+  justify-items: center;
+}
+
+/* SIDE A / katalog detalj */
+
+
+/* needle linija ispod teksta */
+.aperture__inner::after {
+  content: '';
+  width: min(360px, 55vw);
+  height: 1px;
+  margin-top: .6rem;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--paper-ink-40) 18%,
+      var(--paper-ink-40) 46%,
+      transparent 46% 54%,
+      var(--paper-ink-40) 54%,
+      var(--paper-ink-40) 82%,
+      transparent
+    );
+
+  opacity: .75;
+}
+
+.aperture__title {
+  font-variation-settings: 'wdth' 88, 'wght' 900;
+  font-size: clamp(2.8rem, 1rem + 7vw, 7rem);
+  line-height: .88;
+  letter-spacing: -.035em;
+  text-transform: uppercase;
+}
+
+.aperture__lede { max-width: 46ch; color: var(--paper-ink-60); }
+
+/* --- degrade: no pin, no aperture --- */
+
+:root.rm .hero-rig { height: auto; }
+:root.rm .hero-stage { position: static; height: auto; min-height: 100svh; }
+:root.rm .aperture { display: none; }
+:root.rm .hero-scroll__line { animation: none; }
+:root.rm .aperture::before {
+  animation: none;
+}
+
+.no-js .hero-rig { height: auto; }
+.no-js .hero-stage { position: static; height: auto; min-height: 100svh; }
+.no-js .aperture { display: none; }
+
+/* ==========================================================================
+   HOME — category crate
+   ========================================================================== */
+
+.crate {
+  display: grid;
+  gap: 0;
+  border-top: var(--rule-paper);
+}
+
+.crate__row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: clamp(.75rem, .3rem + 1.5vw, 2rem);
+  padding-block: clamp(.85rem, .5rem + 1.2vw, 1.6rem);
+  border-bottom: var(--rule-paper);
+  transition: padding-inline-start .45s var(--ease), background .35s var(--ease);
+}
+
+.crate__row:hover, .crate__row:focus-visible {
+  background: rgba(23, 20, 14, .05);
+  padding-inline-start: clamp(.5rem, .2rem + 1vw, 1.5rem);
+}
+
+.crate__n {
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  color: var(--paper-ink-40);
+  align-self: start;
+  padding-top: .35em;
+}
+
+.crate__label {
+  font-variation-settings: 'wdth' 88, 'wght' 900;
+  font-size: clamp(1.8rem, .6rem + 5.5vw, 4.6rem);
+  line-height: .92;
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+  transition: color .35s var(--ease);
+}
+
+.crate__row:hover .crate__label { color: var(--terra-dark); }
+
+.crate__blurb {
+  font-size: var(--step--1);
+  color: var(--paper-ink-60);
+  max-width: 46ch;
+  padding-top: .25rem;
+}
+
+.crate__side {
+  display: grid;
+  justify-items: end;
+  gap: .3rem;
+  text-align: right;
+}
+
+.crate__count {
+  font-family: var(--ff-mono);
+  font-size: var(--step-1);
+  font-weight: 700;
+}
+
+.crate__meta {
+  font-family: var(--ff-mono);
+  font-size: var(--step--2);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--paper-ink-40);
+}
+
+/* ==========================================================================
+   HOME — selected records (editorial)
+   ========================================================================== */
+
+.selected { display: grid; gap: clamp(2.5rem, 1rem + 5vw, 6rem); }
+
+.selected__item {
+  display: grid;
+  gap: clamp(1.25rem, .5rem + 2.5vw, 3rem);
+  align-items: center;
+}
+
+@media (min-width: 860px) {
+  .selected__item { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); }
+  .selected__item:nth-child(even) .selected__art { order: 2; }
+}
+
+.selected__art { position: relative; }
+
+.selected__art .sleeve { box-shadow: 0 30px 70px rgba(0, 0, 0, .55); }
+
+.selected__disc {
+  position: absolute;
+  top: 50%;
+  right: -6%;
+  width: 62%;
+  translate: 0 -50%;
+  z-index: 0;
+  transition: translate .6s var(--ease);
+}
+
+.selected__item:hover .selected__disc { translate: 12% -50%; }
+
+.selected__n {
+  font-variation-settings: 'wdth' 62, 'wght' 900;
+  font-size: clamp(3rem, 1rem + 9vw, 8rem);
+  line-height: .8;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--bone-20);
+}
+
+.selected__artist {
+  font-variation-settings: 'wdth' 100, 'wght' 900;
+  font-size: var(--step-3);
+  line-height: .98;
+  letter-spacing: -.025em;
+  text-transform: uppercase;
+}
+
+.selected__title { font-size: var(--step-1); color: var(--bone-60); }
+
+.selected__tax {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem .9rem;
+  font-family: var(--ff-mono);
+  font-size: var(--step--2);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--bone-40);
+  padding-block: .4rem;
+}
+
+.selected__row { display: flex; flex-wrap: wrap; align-items: center; gap: .9rem; }
+
+/* ==========================================================================
+   HOME — store / tattoo / contact bands
+   ========================================================================== */
+
+.band { display: grid; gap: clamp(1.5rem, .8rem + 2.5vw, 3.5rem); }
+
+@media (min-width: 900px) {
+  .band { grid-template-columns: minmax(0, .85fr) minmax(0, 1fr); align-items: start; }
+}
+
+.hours { display: grid; border-top: var(--rule); }
+.paper .hours { border-color: var(--paper-ink-16); }
+
+.hours__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: .55rem;
+  border-bottom: var(--rule);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+}
+
+.paper .hours__row { border-color: var(--paper-ink-16); }
+.hours__row.is-closed { color: var(--bone-40); }
+.paper .hours__row.is-closed { color: var(--paper-ink-40); }
+.hours__row.is-today { color: var(--amber); }
+.paper .hours__row.is-today { color: var(--terra-dark); font-weight: 700; }
+
+.contact-list { display: grid; gap: 1rem; }
+
+.contact-list__row {
+  display: grid;
+  gap: .2rem;
+  padding-bottom: 1rem;
+  border-bottom: var(--rule);
+}
+
+.paper .contact-list__row { border-color: var(--paper-ink-16); }
+
+.contact-list__k {
+  font-family: var(--ff-mono);
+  font-size: var(--step--2);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--terra);
+}
+
+.paper .contact-list__k { color: var(--terra-dark); }
+
+.contact-list__v {
+  font-variation-settings: 'wdth' 100, 'wght' 700;
+  font-size: var(--step-1);
+  overflow-wrap: anywhere;
+}
+
+.contact-list__v a:hover { color: var(--terra); }
+.paper .contact-list__v a:hover { color: var(--terra-dark); }
+
+/* map placeholder ------------------------------------------------------- */
+
+.map-slot {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border: 1px dashed var(--bone-20);
+  display: grid;
+  place-items: center;
+  gap: .5rem;
+  text-align: center;
+  padding: 1.5rem;
+  background:
+    repeating-linear-gradient(0deg, rgba(243,243,243,.035) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(90deg, rgba(243,243,243,.035) 0 1px, transparent 1px 34px);
+}
+
+.paper .map-slot {
+  border-color: var(--paper-ink-40);
+  background:
+    repeating-linear-gradient(0deg, rgba(23,20,14,.05) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(90deg, rgba(23,20,14,.05) 0 1px, transparent 1px 34px);
+}
+
+.map-slot__pin { width: 26px; height: 26px; }
+
+/* ==========================================================================
+   CATEGORY / SHOP heroes
+   ========================================================================== */
+
+.page-head {
+  position: relative;
+  padding-top: calc(var(--header-h) + clamp(1.5rem, 1rem + 3vw, 4rem));
+  padding-bottom: clamp(1.25rem, .8rem + 2vw, 2.5rem);
+  overflow: hidden;
+}
+
+.page-head__disc {
+  position: absolute;
+  top: 50%;
+  right: -8%;
+  width: clamp(180px, 30vw, 460px);
+  translate: 0 -50%;
+  z-index: 0;
+  opacity: .38;
+  pointer-events: none;
+}
+
+.page-head__inner { position: relative; z-index: 1; }
+
+.page-head__title {
+  font-variation-settings: 'wdth' 72, 'wght' 900;
+  font-size: clamp(2.8rem, .8rem + 11vw, 9rem);
+  line-height: .82;
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+}
+
+.page-head__lede { max-width: 52ch; color: var(--bone-60); padding-top: .9rem; }
+.paper .page-head__lede { color: var(--paper-ink-60); }
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .45rem;
+  font-family: var(--ff-mono);
+  font-size: var(--step--2);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--bone-40);
+  padding-bottom: .9rem;
+}
+
+.paper .crumbs { color: var(--paper-ink-40); }
+.crumbs a:hover { color: var(--terra); }
+.paper .crumbs a:hover { color: var(--terra-dark); }
+.crumbs li { display: flex; align-items: center; gap: .45rem; }
+.crumbs li + li::before { content: '/'; opacity: .5; }
+
+/* category tab rail ---------------------------------------------------- */
+
+.cat-rail {
+  display: flex;
+  justify-content: center; /* DODAJ OVO */
+  gap: .4rem;
+  overflow-x: auto;
+  padding-block: .8rem;
+  border-block: var(--rule);
+  scrollbar-width: thin;
+}
+
+.paper .cat-rail { border-color: var(--paper-ink-16); }
+
+.cat-rail__link {
+  flex: none;
+  padding: .5em .85em;
+  border: 1px solid var(--bone-20);
+  font-family: var(--ff-mono);
+  font-size: var(--step--2);
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--bone-60);
+  transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
+}
+
+.cat-rail__link:hover { color: var(--bone); border-color: var(--bone-40); }
+
+.cat-rail__link[aria-current='page'] {
+  background: var(--terra);
+  border-color: var(--terra);
+  color: var(--ink);
+}
+
+.paper .cat-rail__link { border-color: var(--paper-ink-16); color: var(--paper-ink-60); }
+.paper .cat-rail__link:hover { color: var(--paper-ink); border-color: var(--paper-ink-40); }
+.paper .cat-rail__link[aria-current='page'] { background: var(--paper-ink); border-color: var(--paper-ink); color: var(--paper); }
+
+/* sale page flavour ---------------------------------------------------- */
+
+.sale-head { background: var(--red); color: var(--bone); }
+
+/* The red hero would swallow the transparent header's terracotta wordmark, so
+   this page starts with the compact dark bar instead. */
+.is-sale .header {
+  background: rgba(14, 14, 16, .94);
+  border-bottom-color: var(--bone-12);
+}
+.sale-head .crumbs { color: rgba(243, 243, 243, .6); }
+.sale-head .page-head__lede { color: rgba(243, 243, 243, .82); }
+
+.sale-head__title {
+  font-variation-settings: 'wdth' 62, 'wght' 900;
+  font-size: clamp(3.4rem, .5rem + 16vw, 12rem);
+  line-height: .78;
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+}
+
+.sale-strip {
+  background: var(--amber);
+  color: var(--ink);
+  border-block: 1px solid var(--ink);
+}
+
+.sale-strip .marquee__item:nth-child(even) { -webkit-text-stroke-color: rgba(14, 14, 16, .45); }
+.sale-strip .marquee__dot { background: var(--red); }
+.sale-strip .marquee { border-block: 0; }
+
+/* ==========================================================================
+   PRODUCT DETAIL — opening the sleeve
+   ========================================================================== */
+
+.pdp {
+  display: grid;
+  gap: clamp(1.5rem, .8rem + 3vw, 4rem);
+  align-items: start;
+}
+
+@media (min-width: 960px) {
+  .pdp { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+
+/* left: artwork with the record behind it */
+
+.pdp__art { position: relative; }
+
+@media (min-width: 960px) {
+  .pdp__art { position: sticky; top: calc(var(--header-h) + 1.5rem); }
+}
+
+.pdp__stage { --peek: 16%; position: relative; padding-right: var(--peek); }
+
+.pdp__disc {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100% - var(--peek));
+  aspect-ratio: 1;
+  z-index: 0;
+  translate: 0 0;
+  transition: translate .7s var(--ease);
+}
+
+.pdp__stage.is-out .pdp__disc { translate: 30% 0; }
+
+.pdp__sleeve {
+  position: relative;
+  z-index: 1;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--bone-20);
+  background: var(--ink-3);
+  box-shadow: 0 40px 90px rgba(0, 0, 0, .6);
+}
+
+.pdp__sleeve img { width: 100%; height: 100%; object-fit: cover; }
+
+.pdp__deck {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .6rem 1rem;
+  padding-top: 1rem;
+}
+
+.pdp__rpm {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .45em .7em;
+  border: 1px solid var(--bone-20);
+  font-family: var(--ff-mono);
+  font-size: var(--step--2);
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--bone-60);
+  transition: border-color .25s, color .25s;
+}
+
+.pdp__rpm[aria-pressed='true'] { border-color: var(--amber); color: var(--amber); }
+
+/* right: the liner notes column */
+
+.pdp__artist {
+  font-variation-settings: 'wdth' 78, 'wght' 900;
+  font-size: clamp(2.2rem, .9rem + 6vw, 5.4rem);
+  line-height: .84;
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+}
+
+.pdp__title {
+  font-variation-settings: 'wdth' 100, 'wght' 500;
+  font-size: var(--step-2);
+  line-height: 1.1;
+  color: var(--bone-80);
+  padding-top: .5rem;
+}
+
+.pdp__buy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding-block: clamp(1.25rem, .8rem + 1.5vw, 2rem);
+  margin-block: clamp(1.25rem, .8rem + 1.5vw, 2rem);
+  border-block: var(--rule);
+}
+
+.pdp__price {
+  font-variation-settings: 'wdth' 100, 'wght' 900;
+  font-size: var(--step-3);
+  line-height: 1;
+  font-feature-settings: 'tnum';
+}
+
+.pdp__price s {
+  display: block;
+  font-size: .42em;
+  font-variation-settings: 'wdth' 100, 'wght' 400;
+  color: var(--bone-40);
+}
+
+.pdp__status {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.pdp__status::before {
+  content: '';
+  width: 7px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.pdp__status--in { color: #7fc26b; }
+.pdp__status--out { color: var(--bone-40); }
+
+/* spec table ----------------------------------------------------------- */
+
+.specs { display: grid; border-top: var(--rule); }
+
+.specs__row {
+  display: grid;
+  grid-template-columns: minmax(7.5rem, 30%) 1fr;
+  gap: 1rem;
+  padding-block: .7rem;
+  border-bottom: var(--rule);
+}
+
+.specs__k {
+  font-family: var(--ff-mono);
+  font-size: var(--step--2);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--bone-40);
+}
+
+.specs__v { font-family: var(--ff-mono); font-size: var(--step--1); overflow-wrap: anywhere; }
+
+/* tracklist ----------------------------------------------------------- */
+
+.tracks { display: grid; gap: 1.5rem; }
+
+.tracks__side { display: grid; gap: .1rem; }
+
+.tracks__sidehead {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding-bottom: .5rem;
+  font-family: var(--ff-mono);
+  font-size: var(--step--2);
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--terra);
+}
+
+.tracks__sidehead::after { content: ''; flex: 1; height: 1px; background: currentColor; opacity: .35; }
+
+.tracks__row {
+  display: grid;
+  grid-template-columns: 2.6rem 1fr;
+  gap: .75rem;
+  padding-block: .45rem;
+  border-bottom: 1px dotted var(--bone-12);
+  transition: background .2s var(--ease), padding-inline .3s var(--ease);
+}
+
+.tracks__row:hover { background: var(--ink-2); padding-inline: .5rem; }
+
+.tracks__pos {
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  color: var(--terra);
+}
+
+.tracks__name { font-size: var(--step-0); overflow-wrap: anywhere; }
+.tracks__name .dur { color: var(--bone-40); font-family: var(--ff-mono); font-size: .82em; margin-left: .5em; }
+
+/* notes --------------------------------------------------------------- */
+
+.notes {
+  font-size: var(--step-0);
+  color: var(--bone-80);
+  max-width: 64ch;
+}
+
+.notes p + p { margin-top: .9em; }
+
+/* related ------------------------------------------------------------- */
+
+.related { border-top: var(--rule); }
+
+/* ==========================================================================
+   CART page
+   ========================================================================== */
+
+.cart-page { display: grid; gap: clamp(1.5rem, .8rem + 3vw, 3.5rem); align-items: start; }
+
+@media (min-width: 940px) {
+  .cart-page { grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); }
+}
+
+.summary {
+  padding: clamp(1.1rem, .7rem + 1.2vw, 1.75rem);
+  border: 1px solid var(--paper-ink-16);
+  background: rgba(255, 255, 255, .3);
+  display: grid;
+  gap: 1rem;
+}
+
+.summary--dark { background: var(--ink-2); border-color: var(--bone-12); }
+
+@media (min-width: 940px) {
+  .summary { position: sticky; top: calc(var(--header-h) + 1.5rem); }
+}
+
+.summary__title {
+  font-variation-settings: 'wdth' 100, 'wght' 850;
+  font-size: var(--step-1);
+  text-transform: uppercase;
+  letter-spacing: -.01em;
+}
+
+.cart-table { display: grid; }
+
+.cart-row {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 1rem;
+  padding-block: 1.1rem;
+  border-bottom: var(--rule-paper);
+  align-items: start;
+}
+
+@media (min-width: 620px) {
+  .cart-row { grid-template-columns: 96px 1fr auto; align-items: center; }
+}
+
+.cart-row__art {
+  aspect-ratio: 1;
+  border: 1px solid var(--paper-ink-16);
+  background: var(--board);
+  overflow: hidden;
+}
+
+.cart-row__art img { width: 100%; height: 100%; object-fit: cover; }
+.cart-row__mid { display: grid; gap: .3rem; min-width: 0; }
+
+.cart-row__artist {
+  font-variation-settings: 'wdth' 100, 'wght' 850;
+  font-size: var(--step-0);
+  text-transform: uppercase;
+  line-height: 1.15;
+}
+
+.cart-row__title { font-size: var(--step--1); color: var(--paper-ink-60); }
+.cart-row__end { display: flex; align-items: center; gap: 1rem; justify-content: space-between; }
+
+.cart-row__price {
+  font-family: var(--ff-mono);
+  font-size: var(--step-0);
+  font-weight: 700;
+  min-width: 7.5ch;
+  text-align: right;
+}
+
+.paper .qty { border-color: var(--paper-ink-40); }
+.paper .qty__val { border-inline-color: var(--paper-ink-40); }
+.paper .qty__btn { color: var(--paper-ink); }
+.paper .qty__btn:hover:not([disabled]) { background: var(--paper-ink); color: var(--paper); }
+.paper .qty__btn[disabled] { color: var(--paper-ink-40); }
+.paper .line__remove { color: var(--paper-ink-40); }
+
+/* ==========================================================================
+   CHECKOUT
+   ========================================================================== */
+
+.checkout { display: grid; gap: clamp(1.5rem, .8rem + 3vw, 3.5rem); align-items: start; }
+
+@media (min-width: 1000px) {
+  .checkout { grid-template-columns: minmax(0, 1fr) minmax(320px, 400px); }
+}
+
+.form-grid { display: grid; gap: 1rem; }
+
+@media (min-width: 640px) {
+  .form-grid--2 { grid-template-columns: 1fr 1fr; }
+  .form-grid--2 > .field--full { grid-column: 1 / -1; }
+}
+
+.fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 1rem; }
+
+.fieldset__legend {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  width: 100%;
+  padding: 0 0 .3rem;
+  font-family: var(--ff-mono);
+  font-size: var(--step--2);
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--terra-dark);
+}
+
+.fieldset__legend::after { content: ''; flex: 1; height: 1px; background: currentColor; opacity: .35; }
+
+.order-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: .5rem;
+  border-bottom: var(--rule-paper);
+  font-size: var(--step--1);
+}
+
+.order-line__q { font-family: var(--ff-mono); color: var(--paper-ink-60); }
+.order-line__p { font-family: var(--ff-mono); white-space: nowrap; }
+
+.notice {
+  padding: .9rem 1rem;
+  border-left: 3px solid var(--terra-dark);
+  background: rgba(223, 111, 81, .1);
+  font-size: var(--step--1);
+  color: var(--paper-ink);
+}
+
+.notice--dark { background: rgba(223, 111, 81, .1); border-color: var(--terra); color: var(--bone-80); }
+
+.receipt {
+  display: grid;
+  gap: 1.25rem;
+  justify-items: center;
+  text-align: center;
+  padding: clamp(1.75rem, 1rem + 3vw, 3.5rem);
+  border: 1px solid var(--paper-ink-16);
+  background: rgba(255, 255, 255, .34);
+}
+
+.receipt__code {
+  font-family: var(--ff-mono);
+  font-size: var(--step-1);
+  font-weight: 700;
+  letter-spacing: .1em;
+  padding: .4em .8em;
+  border: 1px dashed var(--paper-ink-40);
+}
+
+/* ==========================================================================
+   CONTACT — the back cover of the sleeve
+   ========================================================================== */
+
+.backcover {
+  display: grid;
+  gap: clamp(1.5rem, .8rem + 3vw, 3rem);
+}
+
+@media (min-width: 900px) {
+  .backcover { grid-template-columns: 1fr 1fr; }
+}
+
+.panel {
+  position: relative;
+  padding: clamp(1.25rem, .8rem + 2vw, 2.5rem);
+  border: 1px solid var(--paper-ink-16);
+  background: rgba(255, 255, 255, .26);
+  display: grid;
+  gap: 1.25rem;
+  align-content: start;
+}
+
+.panel--ink {
+  background: var(--ink-2);
+  border-color: var(--bone-12);
+  color: var(--bone);
+}
+
+.panel--ink .contact-list__k { color: var(--amber); }
+.panel--ink .contact-list__row { border-color: var(--bone-12); }
+.panel--ink .hours__row { border-color: var(--bone-12); }
+.panel--ink .hours { border-color: var(--bone-12); }
+
+.panel__corner {
+  position: absolute;
+  top: 0; right: 0;
+  padding: .3em .55em;
+  font-family: var(--ff-mono);
+  font-size: var(--step--2);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--paper-ink-40);
+  border-left: 1px solid var(--paper-ink-16);
+  border-bottom: 1px solid var(--paper-ink-16);
+}
+
+.panel--ink .panel__corner { color: var(--bone-40); border-color: var(--bone-12); }
+
+/* ==========================================================================
+   PRIVACY / long form
+   ========================================================================== */
+
+.doc { display: grid; gap: clamp(1.5rem, 1rem + 1.5vw, 2.5rem); }
+
+.doc__section { display: grid; gap: .75rem; }
+
+.doc__h {
+  font-variation-settings: 'wdth' 100, 'wght' 850;
+  font-size: var(--step-1);
+  line-height: 1.15;
+  text-transform: uppercase;
+  letter-spacing: -.005em;
+  padding-top: .5rem;
+  border-top: var(--rule-paper);
+}
+
+.doc p { color: var(--paper-ink); max-width: 76ch; }
+
+.doc__list { display: grid; gap: .5rem; max-width: 76ch; }
+
+.doc__list li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: .7rem;
+  color: var(--paper-ink);
+}
+
+.doc__list li::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  margin-top: .55em;
+  background: var(--terra-dark);
+}
+
+.toc {
+  display: grid;
+  gap: .3rem;
+  padding: clamp(1rem, .7rem + 1vw, 1.5rem);
+  border: 1px solid var(--paper-ink-16);
+  background: rgba(255, 255, 255, .26);
+  align-content: start;
+}
+
+@media (min-width: 1024px) {
+  .doc-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: clamp(2rem, 1rem + 3vw, 4rem); align-items: start; }
+  .toc { position: sticky; top: calc(var(--header-h) + 1.5rem); max-height: calc(100vh - var(--header-h) - 3rem); overflow-y: auto; }
+}
+
+.toc__link {
+  font-family: var(--ff-mono);
+  font-size: var(--step--2);
+  letter-spacing: .06em;
+  color: var(--paper-ink-60);
+  padding-block: .2rem;
+  transition: color .2s var(--ease);
+}
+
+.toc__link:hover { color: var(--terra-dark); }
+
+/* ==========================================================================
+   404
+   ========================================================================== */
+
+.nf {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: calc(var(--header-h) + 2rem) var(--gut) 3rem;
+}
+
+.nf__inner { display: grid; gap: 1.5rem; justify-items: center; }
+
+.nf__code {
+  font-variation-settings: 'wdth' 62, 'wght' 900;
+  font-size: clamp(5rem, 2rem + 18vw, 14rem);
+  line-height: .8;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--terra);
+}
+
+@media (max-width: 700px) {
+  .aperture::before {
+    width: 120vw;
+    opacity: .04;
+  }
+
+  
+
+  .aperture__inner::after {
+    width: 70vw;
+  }
+}

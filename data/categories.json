@@ -1,0 +1,47 @@
+[
+  {
+    "slug": "ploce",
+    "href": "/ploce/",
+    "label": "Ploče",
+    "code": "LP",
+    "rpm": "33⅓ RPM",
+    "blurb": "Gramofonske ploče — vinili, LP izdanja, box setovi i singlovi. Najveći deo kataloga.",
+    "emptyState": "Trenutno nema ploča u ponudi."
+  },
+  {
+    "slug": "diskovi",
+    "href": "/diskovi/",
+    "label": "Diskovi",
+    "code": "CD",
+    "rpm": "COMPACT DISC",
+    "blurb": "Compact diskovi, DVD i BluRay izdanja.",
+    "emptyState": "Trenutno nema diskova u ponudi."
+  },
+  {
+    "slug": "majice",
+    "href": "/majice/",
+    "label": "Majice",
+    "code": "TEE",
+    "rpm": "100% COTTON",
+    "blurb": "Majice sa bendovima i izdanjima iz radnje.",
+    "emptyState": "Trenutno nema majica u ponudi."
+  },
+  {
+    "slug": "solje",
+    "href": "/solje/",
+    "label": "Šolje",
+    "code": "MUG",
+    "rpm": "CERAMIC",
+    "blurb": "Šolje i keramika sa muzičkim motivima.",
+    "emptyState": "Trenutno nema šolja u ponudi."
+  },
+  {
+    "slug": "ostalo",
+    "href": "/ostalo/",
+    "label": "Ostalo",
+    "code": "MISC",
+    "rpm": "MISCELLANEOUS",
+    "blurb": "Slagalice, knjige, posteri i sve ostalo iz radnje.",
+    "emptyState": "Trenutno nema proizvoda u ovoj kategoriji."
+  }
+]

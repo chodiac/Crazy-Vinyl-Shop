@@ -1,0 +1,123 @@
+{
+  "brand": {
+    "name": "Crazy Vinyl Shop",
+    "wordmark": ["CRAZY", "VINYL", "SHOP"],
+    "city": "KRAGUJEVAC",
+    "country": "SRBIJA",
+    "tagline": "Prodavnica gramofonskih ploča, diskova i muzičke robe",
+    "description": "Online shop: prodaja stranih i domaćih diskova (CD, DVD, BluRay) i gramofonskih ploča (Vinili, LP), slagalica, majica, knjiga i ostalo. Jednostavno poručivanje. Plaćanje pouzećem ili karticom. Crazy Vinyl Shop, Srbija.",
+    "legalEntity": "MILA DIMITRIJEVIĆ PR TRGOVINA NA MALO POLOVNOM ROBOM CRAZI VINIL RADIONICA KRAGUJEVAC",
+    "copyright": "Copyright © 2026 – Crazy Vinyl Shop | All rights reserved",
+    "poweredBy": { "label": "Phantom Arts", "url": "https://phantomarts.rs" }
+  },
+  "store": {
+    "address": "Crvenog Barjaka 21, Kragujevac, SRBIJA",
+    "street": "Crvenog Barjaka 21",
+    "city": "Kragujevac",
+    "phone": "+381 65 9966 623",
+    "phoneHref": "+381659966623",
+    "email": "crazyvinylshopkg@gmail.com",
+    "hours": [
+      { "day": "Ponedeljak", "time": "12AM – 9PM" },
+      { "day": "Utorak", "time": "12AM – 9PM" },
+      { "day": "Sreda", "time": "12AM – 9PM" },
+      { "day": "Četvrtak", "time": "12AM – 9PM" },
+      { "day": "Petak", "time": "12AM – 9PM" },
+      { "day": "Subota", "time": "10AM – 9PM" },
+      { "day": "Nedelja", "time": "Zatvoreno" }
+    ]
+  },
+  "tattoo": {
+    "name": "Sicario Tattoo Studio",
+    "phone": "+381 62 1637691",
+    "phoneHref": "+381621637691",
+    "email": "sicariotattoostudio@gmail.com",
+    "note": "Tattoo studio deli prostor sa prodavnicom u Kragujevcu. Za termine i konsultacije javite se direktno studiju."
+  },
+  "social": [
+    { "label": "Facebook", "url": "https://www.facebook.com/crazyvinylshop/" },
+    { "label": "Instagram", "url": "https://www.instagram.com/crazyvinylshop/?hl=en" }
+  ],
+  "nav": [
+    { "label": "Ploče", "href": "/ploce/" },
+    { "label": "Diskovi", "href": "/diskovi/" },
+    { "label": "Majice", "href": "/majice/" },
+    { "label": "Šolje", "href": "/solje/" },
+    { "label": "Ostalo", "href": "/ostalo/" },
+    { "label": "Rasprodaja", "href": "/rasprodaja/", "accent": true }
+  ],
+  "secondaryNav": [
+    { "label": "Proizvodi", "href": "/proizvodi/" },
+    { "label": "Kontakt & Tattoo", "href": "/kontakt/" },
+    { "label": "Politika privatnosti", "href": "/politika-privatnosti/" }
+  ],
+  "checkout": {
+    "paymentMethod": {
+      "value": "pe",
+      "label": "Post Express / Export",
+      "note": "Poručivanje je potvrda narudžbenice. Plaćanje i isporuka idu preko Post Express-a (pouzećem u Srbiji, export u inostranstvo). Online plaćanje karticom trenutno nije aktivno."
+    },
+    "priceListUrl": "http://www.postexpress.rs/struktura/lat/cenovnik/cenovnik-unutrasnji-saobracaj.asp",
+    "zones": [
+      {
+        "id": 1,
+        "label": "+ PTT",
+        "cost": null,
+        "note": "Troškovi dostave po cenovniku Post Express-a, plaćaju se pouzećem.",
+        "countries": ["Srbija"]
+      },
+      {
+        "id": 2,
+        "label": "I zona Evropa",
+        "cost": 2000,
+        "countries": ["Bosna i Hercegovina", "Crna Gora", "Hrvatska", "Makedonija", "Slovenija"]
+      },
+      {
+        "id": 3,
+        "label": "II zona Evropa",
+        "cost": 2650,
+        "countries": ["Albanija"]
+      },
+      {
+        "id": 31,
+        "label": "I zona",
+        "cost": 2700,
+        "countries": [
+          "Andora", "Austrija", "Azejberdžan", "Belorusija", "Bugarska", "Češka Republika",
+          "Estonija", "Gibraltar", "Grčka", "Grenland", "Gruzija", "Holandija", "Irska",
+          "Italija", "Jermenija", "Kipar", "Letonija", "Lihtenštajn", "Luksemburg", "Malta",
+          "Moldavija", "Monako", "Poljska", "Rumunija", "San Marino", "Slovačka", "Španija",
+          "Švajcarska", "Turska", "Vatikan"
+        ]
+      },
+      {
+        "id": 4,
+        "label": "III zona Evropa",
+        "cost": 3700,
+        "countries": [
+          "Belgija", "Danska", "Finska", "Francuska", "Island", "Litvanija", "Mađarska",
+          "Nemačka", "Norveška", "Portugalija", "Rusija", "Švedska", "Ukrajina",
+          "Uzbekistan", "Velika Britanija"
+        ]
+      },
+      {
+        "id": 5,
+        "label": "IV zona",
+        "cost": 3950,
+        "countries": ["Afrika", "Amerika", "Azija", "Kanada"]
+      },
+      {
+        "id": 6,
+        "label": "V zona",
+        "cost": 3950,
+        "countries": ["Australija"]
+      },
+      {
+        "id": 7,
+        "label": "VI zona",
+        "cost": 3950,
+        "countries": ["Novi Zeland i Okeanija"]
+      }
+    ]
+  }
+}
