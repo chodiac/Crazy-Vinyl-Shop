@@ -9,7 +9,7 @@
    data/images.json    slugs that have a real image file on disk
    ========================================================================== */
 
-const BASE = '/Crazy-Vinyl-Shop/data';
+const BASE = new URL('../../data', import.meta.url).pathname.replace(/\/$/, '');
 
 /** Categories that exist as routes even when empty. */
 export const CATEGORY_ORDER = ['ploce', 'diskovi', 'majice', 'solje', 'ostalo'];
