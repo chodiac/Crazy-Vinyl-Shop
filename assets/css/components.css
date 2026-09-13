@@ -53,14 +53,16 @@
 
 .wordmark__logo {
   display: block;
-  width: 70px;
-  height: auto;
+  width: 60px !important;
+  max-width: 60px !important;
+  height: auto !important;
   object-fit: contain;
 }
 
 @media (max-width: 699px) {
   .wordmark__logo {
-    width: 80px;
+    width: 60px !important;
+    max-width: 60px !important;
   }
 }
 
