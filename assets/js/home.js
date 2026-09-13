@@ -17,7 +17,21 @@ const NEW_COUNT = 8;
 
 export async function initHome() {
   initHeroTransition();
+  /* ---- hero logo: rotacija vezana za scroll ---- */
+  const heroLogo = document.querySelector('#heroDisc .vinyl__logo');
 
+  if (heroLogo && window.gsap && window.ScrollTrigger) {
+    window.gsap.to(heroLogo, {
+      rotation: 360,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.hero-rig',
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 0.7,
+      },
+    });
+  }
   const products = await loadProducts();
 
   /* ---- novo u ponudi: real newest titles ---- */
