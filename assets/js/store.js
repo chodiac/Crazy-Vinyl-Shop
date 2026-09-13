@@ -9,7 +9,7 @@
    data/images.json    slugs that have a real image file on disk
    ========================================================================== */
 
-const BASE = '/data';
+const BASE = '/Crazy-Vinyl-Shop/data';
 
 /** Categories that exist as routes even when empty. */
 export const CATEGORY_ORDER = ['ploce', 'diskovi', 'majice', 'solje', 'ostalo'];
@@ -40,8 +40,8 @@ export function loadProducts() {
       return idx.rows.map((row) => {
         const p = {};
         fields.forEach((f, i) => { p[f] = row[i]; });
-        p.href = `/proizvod/${p.slug}/`;
-        p.image = `/images/products/${p.slug}.jpg`;
+        p.href = `/Crazy-Vinyl-Shop/proizvod/${p.slug}/`;
+p.image = `/Crazy-Vinyl-Shop/assets/images/products/${p.slug}.jpg`;
         return p;
       });
     });
