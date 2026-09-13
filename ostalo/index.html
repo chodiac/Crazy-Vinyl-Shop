@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="/Crazy-Vinyl-Shop/">
 <title>Ostalo | Crazy Vinyl Shop</title>
 <meta name="description" content="Slagalice, knjige, posteri i sve ostalo iz radnje. Trenutno nema proizvoda u ovoj kategoriji.">
 <link rel="canonical" href="https://crazyvinylshop.rs/ostalo/">
@@ -19,9 +20,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script>(function(){var d=document.documentElement;d.classList.remove('no-js');try{if(!/[?&]motion=(1|force)/.test(location.search)&&matchMedia('(prefers-reduced-motion: reduce)').matches)d.classList.add('rm');}catch(e){}})();</script>
-<link rel="stylesheet" href="/assets/css/base.css">
-<link rel="stylesheet" href="/assets/css/components.css">
-<link rel="stylesheet" href="/assets/css/pages.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="stylesheet" href="assets/css/pages.css">
 
 </head>
 <body data-page="shop" class="">
@@ -30,14 +31,11 @@
 <header class="header">
   <div class="header__inner">
     <a class="wordmark" href="/" aria-label="Crazy Vinyl Shop, početna">
-  <img
-    src="/assets/images/cvs-logo2.png"
-    alt="Crazy Vinyl Shop"
-    class="wordmark__logo"
-  >
+  <a class="wordmark" href="./" aria-label="Crazy Vinyl Shop, početna">
+  <img src="assets/images/cvs-logo2.png">
 </a>
-    <nav class="nav" aria-label="Glavna navigacija"><a class="nav__link" href="/ploce/">Ploče</a><a class="nav__link" href="/diskovi/">Diskovi</a><a class="nav__link" href="/majice/">Majice</a><a class="nav__link" href="/solje/">Šolje</a><a class="nav__link" href="/ostalo/">Ostalo</a><a class="nav__link nav__link--accent" href="/rasprodaja/">Rasprodaja</a>
-      <a class="nav__link" href="/kontakt/">Kontakt</a>
+    <nav class="nav" aria-label="Glavna navigacija"><a class="nav__link" href="ploce/">Ploče</a><a class="nav__link" href="diskovi/">Diskovi</a><a class="nav__link" href="majice/">Majice</a><a class="nav__link" href="solje/">Šolje</a><a class="nav__link" href="ostalo/">Ostalo</a><a class="nav__link nav__link--accent" href="rasprodaja/">Rasprodaja</a>
+      <a class="nav__link" href="kontakt/">Kontakt</a>
     </nav>
     <div class="header__tools">
       <button type="button" class="icon-btn" id="searchTrigger" aria-expanded="false" aria-controls="searchOverlay">
@@ -59,36 +57,36 @@
   <div></div>
   <div class="mobile-menu__body">
     <ul class="mobile-menu__list"><li class="mobile-menu__item">
-        <a class="mobile-menu__link" href="/ploce/" data-close-menu>
+        <a class="mobile-menu__link" href="ploce/" data-close-menu>
           <span>Ploče</span>
           <span class="mobile-menu__code">LP · 1469</span>
         </a></li><li class="mobile-menu__item">
-        <a class="mobile-menu__link" href="/diskovi/" data-close-menu>
+        <a class="mobile-menu__link" href="diskovi/" data-close-menu>
           <span>Diskovi</span>
           <span class="mobile-menu__code">CD · 1</span>
         </a></li><li class="mobile-menu__item">
-        <a class="mobile-menu__link" href="/majice/" data-close-menu>
+        <a class="mobile-menu__link" href="majice/" data-close-menu>
           <span>Majice</span>
           <span class="mobile-menu__code">TEE · 0</span>
         </a></li><li class="mobile-menu__item">
-        <a class="mobile-menu__link" href="/solje/" data-close-menu>
+        <a class="mobile-menu__link" href="solje/" data-close-menu>
           <span>Šolje</span>
           <span class="mobile-menu__code">MUG · 0</span>
         </a></li><li class="mobile-menu__item">
-        <a class="mobile-menu__link" href="/ostalo/" data-close-menu>
+        <a class="mobile-menu__link" href="ostalo/" data-close-menu>
           <span>Ostalo</span>
           <span class="mobile-menu__code">MISC · 0</span>
         </a></li><li class="mobile-menu__item">
-        <a class="mobile-menu__link" href="/rasprodaja/" data-close-menu>
+        <a class="mobile-menu__link" href="rasprodaja/" data-close-menu>
           <span class="text-terra">Rasprodaja</span><span class="mobile-menu__code">SALE</span>
         </a></li><li class="mobile-menu__item">
-        <a class="mobile-menu__link" href="/kontakt/" data-close-menu>
+        <a class="mobile-menu__link" href="kontakt/" data-close-menu>
           <span>Kontakt</span><span class="mobile-menu__code">TATTOO</span>
         </a></li></ul>
   </div>
   <div class="mobile-menu__foot">
-    <a class="link-cat" href="/proizvodi/" data-close-menu>Ceo katalog</a>
-    <a class="link-cat" href="/korpa/" data-close-menu>Korpa</a>
+    <a class="link-cat" href="proizvodi/"  data-close-menu>Ceo katalog</a>
+    <a class="link-cat" href="korpa/" data-close-menu>Korpa</a>
     <span class="t-meta text-dim">Kragujevac · SRBIJA</span>
   </div>
 </div>
@@ -103,7 +101,7 @@
       </div>
       <div class="search__hint" id="searchHint">
         <span class="t-meta text-dim">npr.</span>
-        <a class="search__chip" href="/proizvodi/?genre=Rock">Rock</a><a class="search__chip" href="/proizvodi/?genre=Heavy Metal">Heavy Metal</a><a class="search__chip" href="/proizvodi/?genre=Rock/Alternative">Rock/Alternative</a><a class="search__chip" href="/proizvodi/?genre=Blues Rock">Blues Rock</a><a class="search__chip" href="/proizvodi/?genre=Metal">Metal</a><a class="search__chip" href="/proizvodi/?genre=Jazz">Jazz</a>
+        <a class="search__chip" href="proizvodi/?genre=Rock">Rock</a><a class="search__chip" href="proizvodi/?genre=Heavy Metal">Heavy Metal</a><a class="search__chip" href="proizvodi/?genre=Rock/Alternative">Rock/Alternative</a><a class="search__chip" href="proizvodi/?genre=Blues Rock">Blues Rock</a><a class="search__chip" href="proizvodi/?genre=Metal">Metal</a><a class="search__chip" href="proizvodi/?genre=Jazz">Jazz</a>
       </div>
     </div>
   </div>
@@ -134,11 +132,11 @@
         
       </div></div>
   <div class="wrap page-head__inner">
-    <nav aria-label="Putanja"><ol class="crumbs"><li><a href="/">Početna</a></li><li><a href="/proizvodi/">Proizvodi</a></li><li><span>Ostalo</span></li></ol></nav>
+    <nav aria-label="Putanja"><ol class="crumbs"><li><a href="./">Početna</a></li><li><a href="proizvodi/" >Proizvodi</a></li><li><span>Ostalo</span></li></ol></nav>
     <h1 class="page-head__title">Ostalo</h1>
     <p class="page-head__lede">Slagalice, knjige, posteri i sve ostalo iz radnje.</p>
   </div>
-</section><nav class="cat-rail" aria-label="Kategorije"><a class="cat-rail__link" href="/proizvodi/">Sve</a><a class="cat-rail__link" href="/ploce/">Ploče</a><a class="cat-rail__link" href="/diskovi/">Diskovi</a><a class="cat-rail__link" href="/majice/">Majice</a><a class="cat-rail__link" href="/solje/">Šolje</a><a class="cat-rail__link" href="/ostalo/" aria-current="page">Ostalo</a><a class="cat-rail__link" href="/rasprodaja/">Rasprodaja</a></nav>
+</section><nav class="cat-rail" aria-label="Kategorije"><a class="cat-rail__link" href="proizvodi/" >Sve</a><a class="cat-rail__link" href="ploce/">Ploče</a><a class="cat-rail__link" href="diskovi/">Diskovi</a><a class="cat-rail__link" href="majice/">Majice</a><a class="cat-rail__link" href="solje/">Šolje</a><a class="cat-rail__link" href="ostalo/" aria-current="page">Ostalo</a><a class="cat-rail__link" href="rasprodaja/">Rasprodaja</a></nav>
 <section class="section section--tight">
   <div class="wrap">
     <div class="shop" id="shop" data-fixed-category="ostalo" data-sale-only="false">
@@ -158,7 +156,7 @@
         </form>
         <div class="chips" id="activeFilters" style="padding-block:.9rem" hidden></div>
         <div class="grid-products" id="grid">
-          <noscript><p class="text-dim">Katalog sa filterima zahteva JavaScript. Svi naslovi su dostupni i preko <a href="/sitemap.xml">mape sajta</a>.</p></noscript>
+          <noscript><p class="text-dim">Katalog sa filterima zahteva JavaScript. Svi naslovi su dostupni i preko <a href="sitemap.xml">mape sajta</a>.</p></noscript>
         </div>
         <div class="loadmore" id="loadMore"></div>
         <div class="empty" style="margin-top:2rem">
@@ -172,7 +170,7 @@
       </div></div>
               <p class="t-display">Trenutno nema proizvoda u ovoj kategoriji.</p>
               <p class="text-dim" style="max-width:44ch">Kategorija postoji i čeka robu. U međuvremenu pogledajte ostatak kataloga.</p>
-              <a class="btn" href="/ploce/">Pogledaj ploče</a>
+              <a class="btn" href="ploce/">Pogledaj ploče</a>
             </div>
       </div>
     </div>
@@ -215,9 +213,9 @@
       </div>
       <div>
         <h2 class="footer__col-title">Katalog</h2>
-        <ul class="footer__list"><li><a href="/ploce/">Ploče <span class="text-dim">(1469)</span></a></li><li><a href="/diskovi/">Diskovi <span class="text-dim">(1)</span></a></li><li><a href="/majice/">Majice <span class="text-dim">(0)</span></a></li><li><a href="/solje/">Šolje <span class="text-dim">(0)</span></a></li><li><a href="/ostalo/">Ostalo <span class="text-dim">(0)</span></a></li>
-          <li><a href="/proizvodi/">Svi proizvodi</a></li>
-          <li><a href="/rasprodaja/">Rasprodaja</a></li>
+        <ul class="footer__list"><li><a href="ploce/">Ploče <span class="text-dim">(1469)</span></a></li><li><a href="diskovi/">Diskovi <span class="text-dim">(1)</span></a></li><li><a href="majice/">Majice <span class="text-dim">(0)</span></a></li><li><a href="solje/">Šolje <span class="text-dim">(0)</span></a></li><li><a href="ostalo/">Ostalo <span class="text-dim">(0)</span></a></li>
+          <li><a href="proizvodi/" >Svi proizvodi</a></li>
+          <li><a href="rasprodaja/">Rasprodaja</a></li>
         </ul>
       </div>
       <div>
@@ -232,13 +230,13 @@
           <li><span>Sicario Tattoo Studio</span></li>
           <li><a href="tel:+381621637691">+381 62 1637691</a></li>
           <li><a href="mailto:sicariotattoostudio@gmail.com">sicariotattoostudio@gmail.com</a></li>
-          <li><a href="/kontakt/">Kontakt &amp; Tattoo</a></li>
+          <li><a href="kontakt/">Kontakt &amp; Tattoo</a></li>
         </ul>
       </div>
       <div>
         <h2 class="footer__col-title">Mreže</h2>
         <ul class="footer__list"><li><a href="https://www.facebook.com/crazyvinylshop/" target="_blank" rel="noopener">Facebook</a></li><li><a href="https://www.instagram.com/crazyvinylshop/?hl=en" target="_blank" rel="noopener">Instagram</a></li>
-          <li><a href="/politika-privatnosti/">Politika privatnosti</a></li>
+          <li><a href="politika-privatnosti/">Politika privatnosti</a></li>
         </ul>
       </div>
     </div>
@@ -250,6 +248,6 @@
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script type="module" src="/assets/js/main.js"></script>
+<script type="module" src="assets/js/main.js"></script>
 </body>
 </html>
