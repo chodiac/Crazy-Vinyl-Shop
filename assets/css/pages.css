@@ -1,6 +1,6 @@
 /* ==========================================================================
    CRAZY VINYL SHOP — page layers
-   hero + vinyl aperture transition · category heroes · product detail
+   hero + vinyl transition · category heroes · product detail
    cart page · checkout · contact · privacy
    ========================================================================== */
 
@@ -8,13 +8,18 @@
    HOME — hero rig
    A tall scroll track with a sticky stage. Progress across the track moves the
    record to centre, spins it up, clips the wordmark away, then opens the
-   spindle hole into a circular aperture onto the shop.
+   spindle hole into a mask punched clean through the stage, so the section
+   underneath shows through it.
    ========================================================================== */
 
 .hero-rig {
   position: relative;
-  height: 260vh;
-  background: var(--ink);
+  z-index: 1;             /* the stage paints over the section lying under it */
+  height: 250svh;         /* 150svh of pinned travel + the stage's own screen */
+
+  /* its last screen lies on top of Odeljenja, so the rig itself must be
+     transparent to input; the hero blocks below opt back in */
+  pointer-events: none;
 }
 
 .hero-stage {
@@ -25,6 +30,43 @@
   overflow: hidden;
   display: grid;
   isolation: isolate;
+  background: var(--ink);
+
+  /* The spindle hole is punched clean through the whole stage, so what shows
+     inside it is the real Odeljenja section underneath rather than a paper
+     stand-in you then have to scroll a screenful past. --ap still counts in
+     the same numbers the timeline has always used. */
+  /* .75vmax per unit of --ap: at 100 that is 75vmax, and the furthest a
+     viewport corner can ever be from its centre is 70.7vmax (a square one),
+     so the hole always clears the corners instead of leaving dark wedges. */
+  --apr: calc(var(--ap, 0) * .75vmax);
+  -webkit-mask-image: radial-gradient(circle var(--apr) at 50% 50%, #0000 0 99%, #000 100%);
+  mask-image: radial-gradient(circle var(--apr) at 50% 50%, #0000 0 99%, #000 100%);
+
+  /* once the hole is open the stage still overlaps the crate for a screenful;
+     nothing here may swallow a click meant for it. Only the three hero blocks
+     take input, and each is tweened with autoAlpha, so the moment they fade
+     they are visibility:hidden and stop capturing too. */
+  pointer-events: none;
+}
+
+.hero-inner { pointer-events: none; }
+.hero-rail, .hero-type, .hero-actions { pointer-events: auto; }
+
+/* Odeljenja lies under the tail of the rig so the hole widens onto it rather
+   than onto nothing.
+
+   Of the 150svh the rig is pinned for, the hole has cleared every corner by
+   about 114svh (0.76 of the way) on any aspect ratio. That is where the
+   section's top edge sits, so nothing is ever caught half-masked; the heading
+   follows 20svh later, already in frame as the record clears, and tops out at
+   0.89 with the rest of the pin still to run. The two numbers are one sum —
+   move either and the other has to move with it. */
+.section--under-hero {
+  position: relative;
+  z-index: 0;
+  margin-top: -136svh;   /* 100svh of stage + 16svh early + 20svh of landing */
+  padding-top: 20svh;
 }
 
 /* ambient lamp glow behind the record */
@@ -84,10 +126,10 @@
   height: 100%;
   image-rendering: pixelated;
   pointer-events: none;
-  opacity: .16;
+  opacity: .085;
 }
 
-:root[data-theme='light'] .tv { opacity: .13; }
+:root[data-theme='light'] .tv { opacity: .07; }
 
 /* shadow mask lines — static, they are the tube, not the signal */
 .tv-lines {
@@ -284,31 +326,22 @@
   .hero-word { font-size: min(clamp(2.8rem, 1rem + 15vw, 7rem), 17vh); }
 }
 
-/* --- the aperture: the spindle hole opening onto the shop --- */
+/* --- grooved backdrop --------------------------------------------------
+   The big soft record. It backs a paper section, so it reads as the room you
+   have walked into rather than as a slide of its own. --- */
 
-.aperture {
-  position: absolute;
-  inset: 0;
-  z-index: 6;
-  display: grid;
-  place-items: center;
-  clip-path: circle(calc(var(--ap, 0) * 1%) at 50% 50%);
-  will-change: clip-path;
+.grooved {
+  position: relative;
   overflow: hidden;
-
-  background:
-    radial-gradient(
-      circle at 50% 46%,
-      rgba(223, 111, 81, .08),
-      transparent 42%
-    ),
-    var(--paper-3);
 }
 
-/* veliki suptilni vinyl u pozadini */
-.aperture::before {
+/* keep the copy above both backdrop layers */
+.grooved > .wrap { position: relative; z-index: 1; }
+
+.grooved::before {
   content: '';
   position: absolute;
+  z-index: 0;
 
   left: 50%;
   top: 50%;
@@ -343,11 +376,25 @@
       transparent 68.8%
     );
 
-  animation: aperturePulse 5.5s ease-in-out infinite;
+  animation: groovePulse 5.5s ease-in-out infinite;
 }
 
+/* the warm lamp that came across with it */
+.grooved::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 50% 46%,
+      rgba(223, 111, 81, .08),
+      transparent 42%
+    );
+}
 
-@keyframes aperturePulse {
+@keyframes groovePulse {
   0%,
   100% {
     scale: 1;
@@ -360,69 +407,25 @@
   }
 }
 
-.aperture__inner {
-  position: relative;
-  z-index: 2;
+/* --- degrade: no pin, no hole --- */
 
-  width: 100%;
-  max-width: var(--maxw);
-  margin-inline: auto;
-  padding-inline: var(--gut);
+:root.rm .hero-rig, .no-js .hero-rig { height: auto; z-index: auto; }
 
-  display: grid;
-  gap: clamp(.75rem, .4rem + 1vw, 1.5rem);
-  text-align: center;
-  justify-items: center;
+:root.rm .hero-stage, .no-js .hero-stage {
+  position: static;
+  height: auto;
+  min-height: 100svh;
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 
-/* SIDE A / katalog detalj */
-
-
-/* needle linija ispod teksta */
-.aperture__inner::after {
-  content: '';
-  width: min(360px, 55vw);
-  height: 1px;
-  margin-top: .6rem;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      var(--paper-ink-40) 18%,
-      var(--paper-ink-40) 46%,
-      transparent 46% 54%,
-      var(--paper-ink-40) 54%,
-      var(--paper-ink-40) 82%,
-      transparent
-    );
-
-  opacity: .75;
+:root.rm .section--under-hero, .no-js .section--under-hero {
+  margin-top: 0;
+  padding-top: clamp(3.5rem, 2rem + 6vw, 8rem);
 }
 
-.aperture__title {
-  font-variation-settings: 'wdth' 88, 'wght' 900;
-  font-size: clamp(2.8rem, 1rem + 7vw, 7rem);
-  line-height: .88;
-  letter-spacing: -.035em;
-  text-transform: uppercase;
-}
-
-.aperture__lede { max-width: 46ch; color: var(--paper-ink-60); }
-
-/* --- degrade: no pin, no aperture --- */
-
-:root.rm .hero-rig { height: auto; }
-:root.rm .hero-stage { position: static; height: auto; min-height: 100svh; }
-:root.rm .aperture { display: none; }
 :root.rm .hero-scroll__line { animation: none; }
-:root.rm .aperture::before {
-  animation: none;
-}
-
-.no-js .hero-rig { height: auto; }
-.no-js .hero-stage { position: static; height: auto; min-height: 100svh; }
-.no-js .aperture { display: none; }
+:root.rm .grooved::before { animation: none; }
 
 /* ==========================================================================
    HOME — category crate
@@ -622,28 +625,31 @@
 
 /* map placeholder ------------------------------------------------------- */
 
-.map-slot {
+.map-embed {
   position: relative;
   aspect-ratio: 16 / 10;
-  border: 1px dashed var(--bone-20);
-  display: grid;
-  place-items: center;
-  gap: .5rem;
-  text-align: center;
-  padding: 1.5rem;
-  background:
-    repeating-linear-gradient(0deg, var(--grid-line) 0 1px, transparent 1px 34px),
-    repeating-linear-gradient(90deg, var(--grid-line) 0 1px, transparent 1px 34px);
+  overflow: hidden;
+  border: 1px solid var(--bone-20);
+  background: var(--board);
+
+  /* Google's tiles arrive in full modern colour; knock them back toward the
+     print palette, and hand the map its own colours on hover. */
+  filter: sepia(.32) saturate(.82) contrast(1.04);
+  transition: filter .5s var(--ease);
 }
 
-.paper .map-slot {
-  border-color: var(--paper-ink-40);
-  background:
-    repeating-linear-gradient(0deg, rgba(23,20,14,.05) 0 1px, transparent 1px 34px),
-    repeating-linear-gradient(90deg, rgba(23,20,14,.05) 0 1px, transparent 1px 34px);
+.map-embed:hover, .map-embed:focus-within { filter: none; }
+
+.paper .map-embed { border-color: var(--paper-ink-16); }
+
+.map-embed iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
-.map-slot__pin { width: 26px; height: 26px; }
+@media (max-width: 640px) { .map-embed { aspect-ratio: 4 / 3; } }
 
 /* ==========================================================================
    CATEGORY / SHOP heroes
@@ -1284,14 +1290,8 @@
 }
 
 @media (max-width: 700px) {
-  .aperture::before {
+  .grooved::before {
     width: 120vw;
     opacity: .04;
-  }
-
-  
-
-  .aperture__inner::after {
-    width: 70vw;
   }
 }

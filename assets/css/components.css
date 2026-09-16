@@ -1523,18 +1523,6 @@
 
 .footer__inner { position: relative; z-index: 1; }
 
-.footer__wordmark {
-  font-variation-settings: 'wdth' 62, 'wght' 900;
-  font-size: clamp(3.4rem, 1rem + 15vw, 13rem);
-  line-height: .78;
-  text-transform: uppercase;
-  letter-spacing: -.01em;
-  padding-block: clamp(1.5rem, .5rem + 3vw, 3rem);
-}
-
-.footer__wordmark span:nth-child(2) { color: var(--terra); }
-.footer__wordmark span { display: block; }
-
 .footer__cols {
   display: grid;
   gap: clamp(1.75rem, 1rem + 3vw, 3rem);

@@ -647,8 +647,17 @@ function initCartDrawer() {
 
 export function buildMarquee(host, items) {
   if (!host || !items.length) return;
+
+  // Rebuild the track only. The .marquee wrapper carries --speed, the rules
+  // above and below, and the hover pause; replacing the host's whole contents
+  // threw it away, the animation shorthand resolved against an empty --speed,
+  // and the strip could then only be moved by something outside itself.
+  const frame = host.classList.contains('marquee') ? host : host.querySelector('.marquee');
+  const track = frame && frame.querySelector('.marquee__track');
+  if (!track) return;
+
   const group = items.map((t) => `<span class="marquee__item">${esc(t)}</span><span class="marquee__dot"></span>`).join('');
-  host.innerHTML = `<div class="marquee__track"><div class="marquee__group">${group}</div><div class="marquee__group" aria-hidden="true">${group}</div></div>`;
+  track.innerHTML = `<div class="marquee__group">${group}</div><div class="marquee__group" aria-hidden="true">${group}</div>`;
 }
 
 /* --------------------------------------------------------------------------

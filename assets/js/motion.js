@@ -172,17 +172,13 @@ export function initHeroTransition() {
   const rig = $('#heroRig');
   if (!rig) return;
 
-  if (prefersReducedMotion() || !hasGsap) {
-    const ap = $('.aperture', rig);
-    if (ap) ap.style.display = 'none';
-    return;
-  }
+  if (prefersReducedMotion() || !hasGsap) return;
 
+  const stage = $('.hero-stage', rig);
   const disc = $('.hero-disc', rig);
   const type = $('.hero-type', rig);
   const rail = $('.hero-rail', rig);
   const actions = $('.hero-actions', rig);
-  const aperture = $('.aperture', rig);
 
   // --disc-x counts in vw, --disc-s is a ratio, --ap is a percentage; all three
   // are plain numbers so the scrub only ever interpolates numbers.
@@ -190,7 +186,7 @@ export function initHeroTransition() {
   const START_X = 22;
 
   gsap.set(disc, { '--disc-x': START_X, '--disc-s': 1, opacity: 1 });
-  gsap.set(aperture, { '--ap': 0 });
+  gsap.set(stage, { '--ap': 0 });
 
   const tl = gsap.timeline({
     defaults: { ease: 'none' },
@@ -211,15 +207,30 @@ export function initHeroTransition() {
   // 1 — the record slides to centre and grows: we move toward the label
   tl.to(disc, { '--disc-x': 0, '--disc-s': 1.55, duration: 0.5 }, 0)
     // 2 — the wordmark lifts out of frame
-    .to(type, { yPercent: -36, opacity: 0, duration: 0.4 }, 0)
-    .to([rail, actions], { opacity: 0, y: -24, duration: 0.3 }, 0)
+    // autoAlpha, not opacity: at 0 it also sets visibility:hidden, which is
+    // what stops the faded hero copy from intercepting clicks on the crate
+    // showing through the hole below it.
+    .to(type, { yPercent: -36, autoAlpha: 0, duration: 0.4 }, 0)
+    .to([rail, actions], { autoAlpha: 0, y: -24, duration: 0.3 }, 0)
     // 3 — keep pushing in until the centre label fills the frame
-    .to(disc, { '--disc-s': 4.4, duration: 0.34 }, 0.48)
-    // 4 — the spindle hole opens and becomes the window onto the shop
-    .to(aperture, { '--ap': 9, duration: 0.14 }, 0.58)
-    .to(aperture, { '--ap': 115, duration: 0.23 }, 0.72)
-    // the record fades out behind the fully open aperture
-    .to(disc, { opacity: 0, duration: 0.08 }, 0.9);
+    .to(disc, { '--disc-s': 4.4, duration: 0.26 }, 0.48)
+    // 4 — the spindle hole opens through the stage onto the shop itself.
+    // It ramps well past the radius that covers the screen (a square viewport,
+    // the worst case, is clear at --ap 94) so the corners are gone by ~0.77
+    // whatever the aspect ratio. Stopping the ramp near that radius meant a
+    // near-square window still had the record biting into the crate's left
+    // edge while the section had already scrolled into place.
+    .to(stage, { '--ap': 9, duration: 0.12 }, 0.50)
+    .to(stage, { '--ap': 190, duration: 0.26 }, 0.62)
+    // the record fades out behind the fully open hole
+    .to(disc, { opacity: 0, duration: 0.08 }, 0.74)
+    // A timeline's duration is wherever its last child ends, and the scrub maps
+    // the whole scroll across that duration. Ending at 0.88 therefore stretched
+    // every position above by 1/0.88 — the hole finished at the very bottom of
+    // the track instead of at 0.88, which is what kept the crate half-masked.
+    // This empty beat pins the duration at 1 so a position IS a scroll
+    // progress, and the numbers above mean what they say.
+    .to({}, { duration: 0.001 }, 0.999);
 
 }
 

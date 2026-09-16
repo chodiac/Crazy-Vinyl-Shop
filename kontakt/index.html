@@ -19,9 +19,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script>(function(){var d=document.documentElement;d.classList.remove('no-js');var t='light';try{var v=localStorage.getItem('cvs.theme');if(v==='light'||v==='dark')t=v;}catch(e){}d.setAttribute('data-theme',t);var m=null;try{m=localStorage.getItem('cvs.motion');}catch(e){}if(/[?&]motion=(1|force)/.test(location.search))m='full';else if(/[?&]motion=0/.test(location.search))m='reduced';if(m==='reduced')d.classList.add('rm');})();</script>
-<link rel="stylesheet" href="../assets/css/base.css">
-<link rel="stylesheet" href="../assets/css/components.css">
-<link rel="stylesheet" href="../assets/css/pages.css">
+<link rel="stylesheet" href="../assets/css/base.css?v=2c87c854">
+<link rel="stylesheet" href="../assets/css/components.css?v=2c87c854">
+<link rel="stylesheet" href="../assets/css/pages.css?v=2c87c854">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Store", "name": "Crazy Vinyl Shop", "address": {"@type": "PostalAddress", "streetAddress": "Crvenog Barjaka 21", "addressLocality": "Kragujevac", "addressCountry": "RS"}, "telephone": "+381 65 9966 623", "email": "crazyvinylshopkg@gmail.com"}</script>
 </head>
 <body data-page="contact" class="">
@@ -195,14 +195,17 @@
 
     <div style="padding-top:clamp(2rem,1rem+3vw,4rem)">
       <p class="eyebrow eyebrow--paper">Lokacija</p>
-      <div class="map-slot" style="margin-top:.9rem">
-        <svg class="map-slot__pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M12 21s7-5.6 7-11a7 7 0 10-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10" r="2.4"/>
-        </svg>
-        <p class="t-meta">Mesto za mapu</p>
-        <p class="text-dim" style="max-width:40ch;font-size:.9em">Crvenog Barjaka 21, Kragujevac, SRBIJA — ovde ide ugrađena mapa kada je dodate.</p>
-        <a class="link-cat" href="https://www.google.com/maps/search/?api=1&amp;query=Crvenog+Barjaka+21,+Kragujevac,+SRBIJA" target="_blank" rel="noopener">Otvori u mapama</a>
+      <div class="map-embed" style="margin-top:.9rem">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5058.979196834431!2d20.91077437619572!3d44.011167671087414!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47572182fe1f03eb%3A0xcf478c351c2d3859!2sCrazy%20Vinyl%20Shop!5e1!3m2!1sen!2srs!4v1789569888680!5m2!1sen!2srs"
+          title="Crazy Vinyl Shop na mapi — Crvenog Barjaka 21, Kragujevac, SRBIJA"
+          loading="lazy"
+          allowfullscreen
+          referrerpolicy="strict-origin-when-cross-origin"></iframe>
       </div>
+      <p class="t-meta" style="padding-top:.8rem">
+        <a class="link-cat" href="https://www.google.com/maps/search/?api=1&amp;query=Crvenog+Barjaka+21,+Kragujevac,+SRBIJA" target="_blank" rel="noopener">Otvori u Google mapama</a>
+      </p>
     </div>
 
     <div style="padding-top:clamp(2rem,1rem+3vw,4rem)">
@@ -225,7 +228,6 @@
         <span class="vinyl__hole"></span>
       </div></div>
   <div class="wrap footer__inner">
-    <p class="footer__wordmark" aria-hidden="true"><span>Crazy</span><span>Vinyl</span><span>Shop</span></p>
     <div class="footer__cols">
       <div>
         <h2 class="footer__col-title">Radnja</h2>
@@ -276,6 +278,6 @@
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script type="module" src="../assets/js/main.js"></script>
+<script type="module" src="../assets/js/main.js?v=2c87c854"></script>
 </body>
 </html>
