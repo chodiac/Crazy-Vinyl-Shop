@@ -12,15 +12,34 @@ import json
 SITE_URL = 'https://crazyvinylshop.rs'
 GSAP = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5'
 
-# Runs before first paint so CSS and JS agree on the motion setting.
-# `?motion=1` forces the full experience on, for design review only.
+# Runs before first paint so CSS and JS agree on theme and motion.
+# Motion is on by default at the shop's request, so the operating system's
+# reduced-motion setting no longer switches it off on its own; the footer
+# switch and `?motion=0` do, and that choice is remembered.
 BOOT_SCRIPT = (
     '<script>(function(){var d=document.documentElement;'
-    "d.classList.remove('no-js');try{"
-    "if(!/[?&]motion=(1|force)/.test(location.search)&&"
-    "matchMedia('(prefers-reduced-motion: reduce)').matches)d.classList.add('rm');"
-    '}catch(e){}})();</script>'
+    "d.classList.remove('no-js');"
+    # theme first, so the page never paints in the wrong one
+    "var t='light';try{var v=localStorage.getItem('cvs.theme');"
+    "if(v==='light'||v==='dark')t=v;}catch(e){}"
+    "d.setAttribute('data-theme',t);"
+    # motion is on by default; only an explicit choice switches it off
+    "var m=null;try{m=localStorage.getItem('cvs.motion');}catch(e){}"
+    "if(/[?&]motion=(1|force)/.test(location.search))m='full';"
+    "else if(/[?&]motion=0/.test(location.search))m='reduced';"
+    "if(m==='reduced')d.classList.add('rm');})();</script>"
 )
+
+# Logo slots. Set from build.py when a file is actually present in images/;
+# until then both fall back to type, the same way product art does.
+LOGO = None
+LABEL_LOGO = None
+WORDMARK = None
+
+
+def set_logos(logo, label_logo, wordmark=None):
+    global LOGO, LABEL_LOGO, WORDMARK
+    LOGO, LABEL_LOGO, WORDMARK = logo, label_logo, wordmark
 
 
 def e(value):
@@ -28,24 +47,26 @@ def e(value):
     return html.escape('' if value is None else str(value), quote=True)
 
 
-def vinyl(label='CVS', sub='KRAGUJEVAC', spin=True, speed=1.0, klass='', orbit=''):
-    """A CSS-drawn record. `spin` opts the element into the rotation engine."""
-    orbit_svg = ''
-    if orbit:
-        oid = 'orbit-' + str(abs(hash(orbit)) % 99999)
-        orbit_svg = (
-            f'<svg class="orbit orbit--spin" viewBox="0 0 100 100" aria-hidden="true">'
-            f'<defs><path id="{oid}" d="M50,50 m-43,0 a43,43 0 1,1 86,0 a43,43 0 1,1 -86,0"/></defs>'
-            f'<text><textPath href="#{oid}" startOffset="0">{e(orbit)}</textPath></text></svg>'
-        )
+def vinyl(label='CVS', spin=True, speed=1.0, klass=''):
+    """A CSS-drawn record.
+
+    The label and the pressing seam live *inside* the rotating layer. They have
+    to: concentric grooves look identical at every angle, so if nothing
+    asymmetric turns with the record it reads as frozen no matter how correctly
+    the rotation engine is running.
+    """
     spin_attr = f' data-spin data-speed="{speed}"' if spin else ' data-spin="off"'
+    if LABEL_LOGO:
+        label_inner = f'<img class="vinyl__logo" src="{e(LABEL_LOGO)}" alt="">'
+    elif label:
+        label_inner = f'<span class="vinyl__labeltype">{e(label)}</span>'
+    else:
+        label_inner = ''
     return f'''<div class="vinyl {klass}" aria-hidden="true">
-        <div class="vinyl__spin"{spin_attr}></div>
-        <div class="vinyl__label">
-          <span class="vinyl__labeltype"><strong>{e(label)}</strong>{e(sub) if sub else ''}</span>
+        <div class="vinyl__spin"{spin_attr}>
+          <div class="vinyl__label">{label_inner}</div>
         </div>
         <span class="vinyl__hole"></span>
-        {orbit_svg}
       </div>'''
 
 
@@ -80,6 +101,12 @@ def crumbs(items):
 # ---------------------------------------------------------------------------
 
 def header(site, categories):
+    if LOGO:
+        wordmark = f'<img class="wordmark__logo" src="{e(LOGO)}" alt="Crazy Vinyl Shop">'
+    else:
+        wordmark = ('<span class="wordmark__disc" aria-hidden="true"></span>'
+                    '<span class="wordmark__type"><span>Crazy</span><span>Vinyl</span>'
+                    '<span>Shop</span></span>')
     nav = ''.join(
         f'<a class="nav__link{" nav__link--accent" if item.get("accent") else ""}" '
         f'href="{e(item["href"])}">{e(item["label"])}</a>'
@@ -88,13 +115,18 @@ def header(site, categories):
     return f'''<header class="header">
   <div class="header__inner">
     <a class="wordmark" href="/" aria-label="Crazy Vinyl Shop, početna">
-      <span class="wordmark__disc" aria-hidden="true"></span>
-      <span class="wordmark__type"><span>Crazy</span><span>Vinyl</span><span>Shop</span></span>
+      {wordmark}
     </a>
     <nav class="nav" aria-label="Glavna navigacija">{nav}
       <a class="nav__link" href="/kontakt/">Kontakt</a>
     </nav>
     <div class="header__tools">
+      <button type="button" class="icon-btn theme-btn" data-theme-toggle aria-label="Prebaci na svetlu temu">
+        <svg viewBox="0 0 20 20" aria-hidden="true">
+          <circle cx="10" cy="10" r="7.25"/>
+          <path class="theme-btn__half" d="M10 2.75a7.25 7.25 0 0 0 0 14.5z"/>
+        </svg>
+      </button>
       <button type="button" class="icon-btn" id="searchTrigger" aria-expanded="false" aria-controls="searchOverlay">
         <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.75"/><path d="M12.8 12.8L17 17"/></svg>
         <span class="icon-btn__label">Pretraga</span>
@@ -138,6 +170,7 @@ def mobile_menu(site, categories, counts):
   <div class="mobile-menu__foot">
     <a class="link-cat" href="/proizvodi/" data-close-menu>Ceo katalog</a>
     <a class="link-cat" href="/korpa/" data-close-menu>Korpa</a>
+    <button type="button" class="link-cat" data-theme-toggle data-theme-label>Svetla tema</button>
     <span class="t-meta text-dim">{e(site['store']['city'])} · {e(site['brand']['country'])}</span>
   </div>
 </div>'''
@@ -196,7 +229,7 @@ def footer(site, categories, counts):
     tattoo = site['tattoo']
 
     return f'''<footer class="footer">
-  <div class="footer__disc" data-parallax="40">{vinyl(label='CVS', sub='33⅓ RPM', speed=0.55, orbit='CRAZY VINYL SHOP · KRAGUJEVAC · SRBIJA · ')}</div>
+  <div class="footer__disc" data-parallax="40">{vinyl(label='CVS', speed=0.55)}</div>
   <div class="wrap footer__inner">
     <p class="footer__wordmark" aria-hidden="true"><span>Crazy</span><span>Vinyl</span><span>Shop</span></p>
     <div class="footer__cols">
@@ -240,6 +273,9 @@ def footer(site, categories, counts):
     </div>
     <div class="footer__bottom">
       <p class="footer__legal">{e(site['brand']['copyright'])}</p>
+      <p class="footer__legal">
+        <button type="button" class="footer__pref" data-motion-toggle>Animacije</button>
+      </p>
       <p class="footer__legal">Powered by <a href="{e(site['brand']['poweredBy']['url'])}" target="_blank" rel="noopener">{e(site['brand']['poweredBy']['label'])}</a></p>
     </div>
   </div>

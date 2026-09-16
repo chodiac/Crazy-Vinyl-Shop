@@ -186,9 +186,10 @@ export function initHeroTransition() {
 
   // --disc-x counts in vw, --disc-s is a ratio, --ap is a percentage; all three
   // are plain numbers so the scrub only ever interpolates numbers.
-  const startX = () => (window.innerWidth < 860 ? 14 : 22);
+  // must match the CSS resting offset, or the disc jumps on load
+  const START_X = 22;
 
-  gsap.set(disc, { '--disc-x': startX(), '--disc-s': 1, opacity: 1 });
+  gsap.set(disc, { '--disc-x': START_X, '--disc-s': 1, opacity: 1 });
   gsap.set(aperture, { '--ap': 0 });
 
   const tl = gsap.timeline({
@@ -198,7 +199,12 @@ export function initHeroTransition() {
       start: 'top top',
       end: 'bottom bottom',
       scrub: 0.55,
-      invalidateOnRefresh: true,
+      // No invalidateOnRefresh. Every value below is a plain constant, nothing
+      // here depends on viewport size — but a refresh (an image finishing, the
+      // fonts landing, a resize, a mobile URL bar) would make GSAP re-record
+      // the tweens' start values from whatever state the disc happened to be
+      // in. Refresh while scrolled to the end and the record's "start" became
+      // scale 0, opacity 0 — scrolling back up then shrank it away to nothing.
     },
   });
 
@@ -215,9 +221,6 @@ export function initHeroTransition() {
     // the record fades out behind the fully open aperture
     .to(disc, { opacity: 0, duration: 0.08 }, 0.9);
 
-  ScrollTrigger.addEventListener('refreshInit', () => {
-    gsap.set(disc, { '--disc-x': startX() });
-  });
 }
 
 /* ==========================================================================

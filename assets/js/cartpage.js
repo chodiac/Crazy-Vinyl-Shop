@@ -4,6 +4,7 @@
    ========================================================================== */
 
 import { formatPrice } from './store.js';
+import { url, productUrl } from './paths.js';
 import { $, esc, mountArtwork, toast, cart, vinylMarkup } from './ui.js';
 import { initMotion } from './motion.js';
 
@@ -18,7 +19,7 @@ export function initCartPage() {
       <div class="cart-row" data-line="${esc(l.slug)}">
         <span class="cart-row__art" data-art="${esc(l.slug)}"><span class="ph__code">IMG</span></span>
         <div class="cart-row__mid">
-          <a href="/proizvod/${esc(l.slug)}/">
+          <a href="${esc(productUrl(l.slug))}">
             ${l.artist ? `<span class="cart-row__artist">${esc(l.artist)}</span>` : ''}
             <span class="cart-row__title">${esc(l.title || l.slug)}</span>
           </a>
@@ -42,10 +43,10 @@ export function initCartPage() {
     if (!state.lines.length) {
       table.innerHTML = `
         <div class="empty">
-          <div class="empty__disc">${vinylMarkup({ label: 'CVS', sub: 'PRAZNO', spin: false })}</div>
+          <div class="empty__disc">${vinylMarkup({ label: 'CVS', spin: false })}</div>
           <p class="t-display">Korpa je prazna</p>
           <p class="text-dim" style="max-width:44ch">Dodajte naslov iz kataloga i vratite se ovde da završite poručivanje.</p>
-          <a class="btn" href="/proizvodi/">Pogledaj katalog</a>
+          <a class="btn" href="${esc(url('proizvodi/'))}">Pogledaj katalog</a>
         </div>`;
       side.innerHTML = '';
       return;
@@ -62,8 +63,8 @@ export function initCartPage() {
         <div class="totals__row"><span>Dostava</span><span>Bira se na kasi</span></div>
         <div class="totals__row totals__row--grand"><span>Ukupno</span><span>${formatPrice(state.subtotal)}</span></div>
       </div>
-      <a class="btn btn--block" href="/checkout/">Nastavi na kasu</a>
-      <a class="btn btn--ghost btn--block" href="/proizvodi/">Nastavi kupovinu</a>
+      <a class="btn btn--block" href="${esc(url('checkout/'))}">Nastavi na kasu</a>
+      <a class="btn btn--ghost btn--block" href="${esc(url('proizvodi/'))}">Nastavi kupovinu</a>
       <button type="button" class="btn btn--ghost btn--block" data-cart-clear>Isprazni korpu</button>`;
   });
 

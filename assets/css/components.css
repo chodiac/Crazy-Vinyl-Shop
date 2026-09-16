@@ -24,10 +24,23 @@
 /* Sits inside the hero at first, then compacts into a printed rule. */
 .header.is-stuck {
   height: 58px;
-  background: rgba(14, 14, 16, .92);
+  background: var(--overlay);
   border-bottom-color: var(--bone-12);
   backdrop-filter: saturate(140%) blur(8px);
 }
+
+.header::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: calc(100% + 30px);
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(var(--ink) 30%, transparent);
+  transition: opacity .45s var(--ease);
+}
+
+.header.is-stuck::before { opacity: 0; }
 
 .header.is-hidden { transform: translateY(-100%); }
 .header { transition-property: background, border-color, height, transform; }
@@ -51,18 +64,57 @@
   flex: none;
 }
 
+/* An image logo when one exists in images/, otherwise the typographic
+   wordmark below. Both are styled so either can be dropped in. */
+/* The shop emblem is roughly square, so it is sized off the bar's height and
+   rides the header as it compacts, rather than being pinned to a width. */
 .wordmark__logo {
   display: block;
-  width: 60px !important;
-  max-width: 60px !important;
-  height: auto !important;
+  /* The emblem is a dense square lockup — below ~60px the bird stops reading,
+     so it takes most of the bar's height rather than sitting in it politely. */
+  height: min(calc(var(--header-h) - 8px), 76px);
+  width: auto;
+  max-width: 200px;
   object-fit: contain;
+  transition: height .45s var(--ease);
 }
 
+.header.is-stuck .wordmark__logo { height: 50px; }
+
 @media (max-width: 699px) {
-  .wordmark__logo {
-    width: 60px !important;
-    max-width: 60px !important;
+  .wordmark__logo { height: min(calc(var(--header-h) - 6px), 62px); }
+}
+
+.wordmark__disc {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, var(--rec-label) 0 18%, transparent 18.5%),
+    repeating-radial-gradient(circle at 50% 50%, #000 0 1px, #2a2a31 1px 2.5px);
+  box-shadow: inset 0 0 0 1px rgba(243, 243, 243, .2);
+  transition: rotate 1.2s var(--ease);
+}
+
+.wordmark:hover .wordmark__disc { rotate: 180deg; }
+
+.wordmark__type {
+  font-variation-settings: 'wdth' 68, 'wght' 900;
+  font-size: 1.18rem;
+  line-height: .9;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  display: grid;
+}
+
+.wordmark__type span:nth-child(2) { color: var(--terra); }
+
+@media (min-width: 700px) {
+  .wordmark__type {
+    grid-auto-flow: column;
+    gap: .38em;
+    font-size: 1.3rem;
   }
 }
 
@@ -143,6 +195,16 @@
 @media (min-width: 780px) {
   .icon-btn__label { display: inline; }
 }
+
+/* theme toggle — a record seen half-lit; it turns over when the theme flips */
+.theme-btn svg { width: 18px; height: 18px; }
+.theme-btn .theme-btn__half { fill: currentColor; stroke: none; }
+
+.theme-btn svg {
+  transition: rotate .55s var(--ease);
+}
+
+:root[data-theme='light'] .theme-btn svg { rotate: 180deg; }
 
 .cart-btn { position: relative; }
 
@@ -265,7 +327,7 @@
   z-index: 850;
   display: grid;
   grid-template-rows: auto 1fr;
-  background: rgba(14, 14, 16, .97);
+  background: var(--overlay-strong);
   backdrop-filter: blur(10px);
   opacity: 0;
   visibility: hidden;
@@ -396,7 +458,7 @@
   position: fixed;
   inset: 0;
   z-index: 810;
-  background: rgba(8, 8, 9, .72);
+  background: var(--scrim);
   opacity: 0;
   visibility: hidden;
   transition: opacity .4s var(--ease), visibility .4s;
@@ -576,7 +638,7 @@
   border-radius: 50%;
   pointer-events: none;
   background:
-    radial-gradient(circle at 50% 50%, var(--terra) 0 20%, transparent 20.5%),
+    radial-gradient(circle at 50% 50%, var(--rec-label) 0 20%, transparent 20.5%),
     repeating-radial-gradient(circle at 50% 50%, #000 0 1px, #33333c 1px 2.5px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, .6);
   will-change: transform, opacity;
@@ -591,7 +653,7 @@
   aspect-ratio: 1;
   border-radius: 50%;
   isolation: isolate;
-  /* label and orbit type are sized against the record, not the viewport, so a
+  /* label type is sized against the record, not the viewport, so a
      150px card disc and a 1300px hero disc print at the same relative scale */
   container-type: inline-size;
   background:
@@ -612,6 +674,8 @@
 }
 
 /* specular sheen sweeping across the disc */
+/* Ambient lighting on the disc as a whole. Discs that do not spin (the cards)
+   get their highlight from here; spinning ones add the moving glint above. */
 .vinyl::before {
   content: '';
   position: absolute;
@@ -619,10 +683,10 @@
   border-radius: 50%;
   background: conic-gradient(from var(--sheen, 210deg),
     rgba(255, 255, 255, 0) 0deg,
-    rgba(255, 255, 255, .1) 22deg,
+    rgba(255, 255, 255, .075) 22deg,
     rgba(255, 255, 255, 0) 58deg,
     rgba(255, 255, 255, 0) 180deg,
-    rgba(255, 255, 255, .075) 205deg,
+    rgba(255, 255, 255, .055) 205deg,
     rgba(255, 255, 255, 0) 245deg,
     rgba(255, 255, 255, 0) 360deg);
   mix-blend-mode: screen;
@@ -630,14 +694,36 @@
   z-index: 3;
 }
 
+/* Everything that should visibly turn lives here.
+   The grooves are concentric, so they look identical at every angle — without
+   an asymmetric mark on this layer the record reads as frozen no matter how
+   correctly the rotation engine runs. The pressing seam and the moving glint
+   are that mark. */
 .vinyl__spin {
   position: absolute;
   inset: 0;
+  z-index: 1;
   border-radius: 50%;
   will-change: transform;
+  background:
+    /* pressing seam: soft enough to read as light on the mark, not a scratch */
+    conic-gradient(from 0deg,
+      rgba(255, 255, 255, .10) 0deg 1.4deg,
+      rgba(255, 255, 255, .035) 1.4deg 4deg,
+      transparent 4deg 360deg),
+    /* the glint that sweeps past as the record turns */
+    conic-gradient(from 88deg,
+      transparent 0deg,
+      rgba(255, 255, 255, .13) 16deg,
+      transparent 40deg,
+      transparent 180deg,
+      rgba(255, 255, 255, .085) 196deg,
+      transparent 220deg,
+      transparent 360deg);
 }
 
 /* the centre label, and the spindle hole that the hero transition opens */
+/* Sits inside .vinyl__spin, so a label logo turns with the record. */
 .vinyl__label {
   position: absolute;
   inset: 50%;
@@ -646,7 +732,7 @@
   translate: -50% -50%;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 50% 50%, var(--label-2, #c9543a) 0 52%, var(--label-1, #df6f51) 52% 100%);
+    radial-gradient(circle at 50% 50%, var(--label-2, var(--rec-label-2)) 0 52%, var(--label-1, var(--rec-label)) 52% 100%);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, .5), inset 0 0 18px rgba(0, 0, 0, .25);
   display: grid;
   place-items: center;
@@ -656,16 +742,27 @@
 .vinyl__logo {
   position: relative;
   z-index: 2;
-
-  width: 58%;
-  height: auto;
-
   display: block;
+  width: 88%;
+  height: 88%;
   object-fit: contain;
-
   pointer-events: none;
   user-select: none;
 }
+
+/* A real label logo replaces the printed terracotta label with a pressed black
+   one. That suits the artwork whether it arrives on black or on transparency,
+   and it is what a shop's own label actually looks like. */
+.vinyl__label:has(.vinyl__logo) {
+  background:
+    radial-gradient(circle at 50% 42%, #1c1b20 0 58%, #0c0c0f 58% 100%);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, .65),
+    inset 0 0 0 1px rgba(243, 243, 243, .16),
+    inset 0 0 26px rgba(0, 0, 0, .5);
+}
+
+.vinyl__label:has(.vinyl__logo)::after { border-color: rgba(243, 243, 243, .1); }
 
 .vinyl__label::after {
   /* concentric label print rings */
@@ -680,25 +777,16 @@
   position: relative;
   z-index: 1;
   text-align: center;
-  color: var(--ink);
-  font-family: var(--ff-mono);
-  font-size: max(7px, 2.4cqw);
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  line-height: 1.35;
-  padding-inline: 8%;
-  text-wrap: balance;
-}
-
-.vinyl__labeltype strong {
-  display: block;
+  color: var(--label-fg);
   font-family: var(--ff);
   font-variation-settings: 'wdth' 78, 'wght' 900;
-  font-size: 2.1em;
-  letter-spacing: 0;
+  font-size: max(9px, 5.2cqw);
+  letter-spacing: -.01em;
+  text-transform: uppercase;
   line-height: .92;
-  padding-bottom: .12em;
 }
+
+
 
 .vinyl__hole {
   position: absolute;
@@ -712,15 +800,6 @@
   z-index: 4;
 }
 
-/* circular text orbiting a disc */
-/* Circular label print. Font size is in viewBox units, so it stays at a fixed
-   fraction of the record's diameter at any size. */
-.orbit { position: absolute; inset: -5%; z-index: 1; pointer-events: none; }
-.orbit text { font-family: var(--ff-mono); font-size: 2.4px; letter-spacing: .28em; fill: var(--bone-40); text-transform: uppercase; }
-.orbit--spin { animation: orbit 44s linear infinite; }
-
-@keyframes orbit { to { rotate: 360deg; } }
-
 /* ==========================================================================
    product card — a sleeve in a crate, the record slides out on hover
    ========================================================================== */
@@ -729,6 +808,15 @@
   display: grid;
   gap: clamp(1.5rem, .5rem + 2.5vw, 2.75rem) clamp(1rem, .4rem + 1.5vw, 2rem);
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+}
+
+/* Phones get two records to a row — a crate you flip through, not a single
+   column. Everything in the card has to survive roughly 150px of width. */
+@media (max-width: 640px) {
+  .grid-products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem .75rem;
+  }
 }
 
 .card {
@@ -760,7 +848,7 @@
   translate: 0 0;
   rotate: 0deg;
   /* a rim light so a black record still reads against a dark sleeve */
-  box-shadow: inset 0 0 0 1px var(--bone-20), -10px 0 22px rgba(0, 0, 0, .65);
+  box-shadow: inset 0 0 0 1px rgba(243, 243, 243, .2), -10px 0 22px rgba(0, 0, 0, .55);
   transition: translate .55s var(--ease), rotate .9s var(--ease);
 }
 
@@ -799,10 +887,10 @@
   padding: clamp(.5rem, .35rem + .5vw, .9rem);
   background:
     repeating-linear-gradient(135deg,
-      rgba(243, 243, 243, .022) 0 8px,
-      rgba(243, 243, 243, 0) 8px 16px),
+      var(--ph-line) 0 8px,
+      transparent 8px 16px),
     var(--ink-3);
-  color: var(--bone-40);
+  color: var(--bone-60);
   text-align: center;
   overflow: hidden;
 }
@@ -817,8 +905,8 @@
   translate: -50% -50%;
   border-radius: 50%;
   background: repeating-radial-gradient(circle at 50% 50%,
-    rgba(243, 243, 243, .05) 0 1px,
-    rgba(243, 243, 243, 0) 1px 9px);
+    var(--ph-ring) 0 1px,
+    transparent 1px 9px);
   pointer-events: none;
 }
 
@@ -850,6 +938,7 @@
 }
 
 .ph__tag { color: var(--terra); }
+:root[data-theme='light'] .ph__tag { color: var(--terra-dark); }
 
 .ph__mid {
   position: relative;
@@ -873,7 +962,7 @@
   font-family: var(--ff-mono);
   font-size: clamp(.5rem, .34rem + .4vw, .68rem);
   line-height: 1.3;
-  color: var(--bone-40);
+  color: var(--bone-60);
   overflow-wrap: anywhere;
 }
 
@@ -892,8 +981,8 @@
 }
 
 .flag--sold { background: var(--ink); color: var(--bone); box-shadow: inset 0 0 0 1px var(--bone-40); }
-.flag--sale { background: var(--red); color: var(--bone); }
-.flag--new { background: var(--amber); color: var(--ink); }
+.flag--sale { background: var(--red-deep); color: var(--on-deep); }
+.flag--new { background: var(--amber); color: var(--on-bright); }
 .flag--right { left: auto; right: 0; }
 
 .card.is-sold .sleeve { filter: saturate(.25) brightness(.72); }
@@ -901,7 +990,8 @@
 
 /* card meta ------------------------------------------------------------- */
 
-.card__meta { display: grid; gap: .3rem; }
+/* the sleeve needs air under it before the title starts */
+.card__meta { display: grid; gap: .3rem; padding-top: .95rem; }
 
 .card__artist {
   font-variation-settings: 'wdth' 100, 'wght' 850;
@@ -931,6 +1021,39 @@
   gap: .75rem;
   margin-top: auto;
   padding-top: .2rem;
+}
+
+@media (max-width: 640px) {
+  .card { gap: .6rem; }
+  .card__meta { padding-top: .7rem; gap: .2rem; }
+  .card__artist { font-size: var(--step--1); }
+  .card__title { font-size: var(--step--2); }
+  .card__tax { font-size: .6rem; letter-spacing: .06em; }
+
+  /* price above the button: side by side they would both wrap */
+  .card__foot {
+    flex-direction: column;
+    align-items: stretch;
+    gap: .45rem;
+  }
+
+  .card__price { font-size: var(--step--1); }
+
+  .card__add {
+    width: 100%;
+    padding: .6em .4em;
+    font-size: .58rem;
+    letter-spacing: .06em;
+  }
+
+  .card__sold { text-align: center; font-size: .58rem; }
+
+  /* the sleeve placeholder has less room for its caption */
+  .ph { padding: .45rem; gap: .3rem; }
+  .ph__tag, .ph__code { font-size: .44rem; letter-spacing: .1em; }
+  .ph__artist { font-size: .66rem; }
+  .ph__title { font-size: .46rem; }
+  .flag { font-size: .52rem; padding: .3em .45em; }
 }
 
 .card__price {
@@ -984,8 +1107,8 @@
     linear-gradient(var(--paper-ink-40) 0 0) right bottom / 1px 9px no-repeat;
 }
 .paper .ph__tag { color: var(--terra-dark); }
-.paper .ph__artist { color: var(--paper-ink-60); }
-.paper .ph__title { color: var(--paper-ink-40); }
+.paper .ph__artist { color: var(--paper-ink); }
+.paper .ph__title { color: var(--paper-ink-60); }
 .paper .card__title, .paper .card__tax { color: var(--paper-ink-60); }
 .paper .card__add { border-color: var(--paper-ink-40); color: var(--paper-ink); }
 .paper .card__add:hover { background: var(--paper-ink); border-color: var(--paper-ink); color: var(--paper); }
@@ -1053,7 +1176,6 @@
 
 :root.rm .marquee__track { animation: none; transform: none; }
 :root.rm .marquee { overflow-x: auto; }
-:root.rm .orbit--spin { animation: none; }
 
 /* ==========================================================================
    filters
@@ -1175,7 +1297,7 @@
   gap: .45rem;
   padding: .35em .6em;
   border: 1px solid var(--terra);
-  background: rgba(223, 111, 81, .12);
+  background: var(--tint-terra);
   font-family: var(--ff-mono);
   font-size: var(--step--2);
   font-weight: 700;
@@ -1373,7 +1495,7 @@
 }
 
 .radio-card input { margin-top: .25rem; accent-color: var(--terra-dark); }
-.radio-card:has(input:checked) { border-color: var(--terra-dark); background: rgba(223, 111, 81, .1); }
+.radio-card:has(input:checked) { border-color: var(--terra-dark); background: var(--tint-terra); }
 
 /* ==========================================================================
    footer
@@ -1397,6 +1519,7 @@
 }
 
 @media (min-width: 900px) { .footer__disc { opacity: .62; } }
+:root[data-theme='light'] .footer__disc { opacity: .72; }
 
 .footer__inner { position: relative; z-index: 1; }
 
@@ -1460,6 +1583,17 @@
 .footer__legal a { text-decoration: underline; text-underline-offset: .2em; }
 .footer__legal a:hover { color: var(--terra); }
 
+/* quiet preference switch, same weight as the legal line around it */
+.footer__pref {
+  font: inherit;
+  color: var(--bone-60);
+  border-bottom: 1px dotted var(--bone-40);
+  padding-bottom: .1em;
+  transition: color .25s var(--ease), border-color .25s var(--ease);
+}
+
+.footer__pref:hover { color: var(--bone); border-bottom-color: var(--bone); }
+
 /* ==========================================================================
    toast
    ========================================================================== */
@@ -1490,7 +1624,7 @@
   animation: toast-in .35s var(--ease) both;
 }
 
-.toast--err { background: var(--red); color: var(--bone); }
+.toast--err { background: var(--red-deep); color: var(--on-deep); }
 
 .toast.is-out { animation: toast-out .3s var(--ease) both; }
 

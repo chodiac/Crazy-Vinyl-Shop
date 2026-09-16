@@ -17,16 +17,44 @@ from collections import Counter
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKIP_DIRS = {'.git', 'tools', 'node_modules', '.claude'}
 
-HREF = re.compile(r'(?:href|src)="(/[^"#?]*)(?:[#?][^"]*)?"')
+HREF = re.compile(r'(?:href|src)="([^"]+)"')
+EXTERNAL = re.compile(r'^(?:[a-z][a-z0-9+.-]*:|//|#)', re.I)
 
 
-def resolves(path):
-    """Mirror how a static host resolves a URL path."""
-    rel = path.lstrip('/')
-    target = os.path.join(ROOT, rel.replace('/', os.sep))
+def is_internal(link):
+    """Skip absolute URLs, mailto:, tel:, data: and pure fragments."""
+    return bool(link) and not EXTERNAL.match(link)
+
+
+def resolve(page_path, link):
+    """Where a link points on disk.
+
+    Pages link relatively (./assets, ../../proizvod), so a link only means
+    something relative to the page that carries it — resolving everything
+    against the site root silently matched nothing and made this audit pass
+    while checking zero links.
+    """
+    clean = link.split('#')[0].split('?')[0]
+    if not clean:
+        return None
+    if clean.startswith('/'):
+        target = os.path.join(ROOT, clean.lstrip('/').replace('/', os.sep))
+    else:
+        target = os.path.normpath(
+            os.path.join(os.path.dirname(page_path), clean.replace('/', os.sep)))
+    return target
+
+
+def resolves(page_path, link):
+    """Mirror how a static host resolves a URL."""
+    target = resolve(page_path, link)
+    if target is None:
+        return True  # same-page fragment or query only
+    if os.path.commonpath([os.path.abspath(target), ROOT]) != ROOT:
+        return False  # escaped the site root
     if os.path.isfile(target):
         return True
-    if path.endswith('/') or os.path.isdir(target):
+    if link.split('#')[0].split('?')[0].endswith('/') or os.path.isdir(target):
         return os.path.isfile(os.path.join(target, 'index.html'))
     return False
 
@@ -49,13 +77,16 @@ def main():
         rel_page = os.path.relpath(p, ROOT).replace(os.sep, '/')
         for m in HREF.finditer(html):
             link = m.group(1)
-            total_links += 1
-            if link in checked:
+            if not is_internal(link):
                 continue
-            checked.add(link)
-            if not resolves(link):
-                broken[f'{link}  (first seen in {rel_page})'] += 1
-        for asset in ('/assets/css/base.css', '/assets/js/main.js'):
+            total_links += 1
+            key = (os.path.dirname(rel_page), link)
+            if key in checked:
+                continue
+            checked.add(key)
+            if not resolves(p, link):
+                broken[f'{link}  (in {rel_page})'] += 1
+        for asset in ('assets/css/base.css', 'assets/js/main.js'):
             if asset not in html:
                 missing_assets.append((rel_page, asset))
 

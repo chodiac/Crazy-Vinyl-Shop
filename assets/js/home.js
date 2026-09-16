@@ -11,27 +11,20 @@ import {
 } from './store.js';
 import { $, esc, renderGrid, buildMarquee, artworkMarkup, vinylMarkup, mountArtwork } from './ui.js';
 import { initMotion, initHeroTransition } from './motion.js';
+import { url } from './paths.js';
+import { initTvStatic } from './tv.js';
 
 const SELECTED_COUNT = 3;
 const NEW_COUNT = 8;
 
 export async function initHome() {
   initHeroTransition();
-  /* ---- hero logo: rotacija vezana za scroll ---- */
-  const heroLogo = document.querySelector('#heroDisc .vinyl__logo');
+  initTvStatic(document.getElementById('tvStatic'));
 
-  if (heroLogo && window.gsap && window.ScrollTrigger) {
-    window.gsap.to(heroLogo, {
-      rotation: 360,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '.hero-rig',
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: 0.7,
-      },
-    });
-  }
+  // The label — logo included — is a child of .vinyl__spin, so the rotation
+  // engine already turns it with the record at scroll velocity. Do not add a
+  // second tween here; it would spin the logo out of step with the disc.
+
   const products = await loadProducts();
 
   /* ---- novo u ponudi: real newest titles ---- */
@@ -76,8 +69,9 @@ export async function initHome() {
         <article class="selected__item fade-up">
           <div class="selected__art">
             <div class="selected__disc vinyl" aria-hidden="true">
-              <div class="vinyl__spin" data-spin data-speed="${(0.5 + i * 0.25).toFixed(2)}"></div>
-              <div class="vinyl__label"><span class="vinyl__labeltype"><strong>${esc((p.artist || 'CVS').slice(0, 3).toUpperCase())}</strong>${esc(p.year || '')}</span></div>
+              <div class="vinyl__spin" data-spin data-speed="${(0.5 + i * 0.25).toFixed(2)}">
+                <div class="vinyl__label"><span class="vinyl__labeltype">${esc((p.artist || 'CVS').slice(0, 3).toUpperCase())}</span></div>
+              </div>
               <span class="vinyl__hole"></span>
             </div>
             ${artworkMarkup(p, { tag: `IZBOR / ${String(i + 1).padStart(2, '0')}` })}
@@ -112,10 +106,10 @@ export async function initHome() {
     } else {
       saleBand.innerHTML = `
         <div class="empty" style="grid-column:1/-1">
-          <div class="empty__disc">${vinylMarkup({ label: 'SALE', sub: 'NEMA', spin: false })}</div>
+          <div class="empty__disc">${vinylMarkup({ label: 'SALE', spin: false })}</div>
           <p class="t-display">Trenutno nema aktivne rasprodaje</p>
           <p class="text-dim" style="max-width:46ch">Kada neki naslovi odu na sniženje, pojaviće se ovde i na stranici Rasprodaja.</p>
-          <a class="btn btn--ghost" href="/ploce/">Pogledaj ploče</a>
+          <a class="btn btn--ghost" href="${esc(url('ploce/'))}">Pogledaj ploče</a>
         </div>`;
     }
   }

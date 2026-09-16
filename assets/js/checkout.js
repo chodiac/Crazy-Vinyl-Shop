@@ -9,6 +9,7 @@
 
 import { loadSite, formatPrice, formatNumber } from './store.js';
 import { $, $$, esc, toast, cart, mountArtwork } from './ui.js';
+import { url } from './paths.js';
 
 /* --------------------------------------------------------------------------
    validation
@@ -220,8 +221,8 @@ export async function initCheckout() {
           Za sve pre toga: <a href="tel:${esc(site.store.phoneHref)}">${esc(site.store.phone)}</a>.
         </p>
         <div style="display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center">
-          <a class="btn" href="/proizvodi/">Nastavi kupovinu</a>
-          <a class="btn btn--ghost" href="/kontakt/">Kontakt</a>
+          <a class="btn" href="${esc(url('proizvodi/'))}">Nastavi kupovinu</a>
+          <a class="btn btn--ghost" href="${esc(url('kontakt/'))}">Kontakt</a>
         </div>`;
       receipt.scrollIntoView({ block: 'center', behavior: 'smooth' });
       receipt.setAttribute('tabindex', '-1');

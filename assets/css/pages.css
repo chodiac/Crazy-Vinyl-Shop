@@ -34,15 +34,108 @@
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(58% 62% at 74% 46%, rgba(223, 111, 81, .2) 0%, transparent 70%),
-    radial-gradient(40% 50% at 18% 18%, rgba(251, 176, 64, .1) 0%, transparent 70%);
+    radial-gradient(58% 62% at 74% 46%, var(--glow-1) 0%, transparent 70%),
+    radial-gradient(40% 50% at 18% 18%, var(--glow-2) 0%, transparent 70%);
   pointer-events: none;
 }
 
-/* Above the record: the wordmark must never be covered by it. */
+/* The record is black in both themes. On paper that would swallow the dark
+   hero type, so the light theme washes the text column back to the ground.
+
+   Hero stacking, front to back: content 4 · wash 2 · record 1 · tube 0 */
+:root[data-theme='light'] .hero-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(103deg,
+    var(--ink) 0 20%,
+    color-mix(in srgb, var(--ink) 72%, transparent) 38%,
+    transparent 58%);
+}
+
+@media (max-width: 860px) {
+  :root[data-theme='light'] .hero-stage::after {
+    background: linear-gradient(176deg,
+      var(--ink) 0 26%,
+      color-mix(in srgb, var(--ink) 70%, transparent) 46%,
+      transparent 66%);
+  }
+}
+
+/* ==========================================================================
+   HERO — analogue static
+   A dead channel behind the record. The canvas is 160x96 and stretched, so the
+   snow is chunky the way broadcast noise actually is, and costs nothing.
+   ========================================================================== */
+
+/* Plain alpha, no blend mode. `multiply` vanishes against the black record and
+   `screen` vanishes against paper — the hero has both, so the snow is simply
+   composited over whatever is beneath it.
+
+   It sits at the very back: the dead channel is what the record is playing in
+   front of, not a filter laid over it. */
+.tv {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  pointer-events: none;
+  opacity: .16;
+}
+
+:root[data-theme='light'] .tv { opacity: .13; }
+
+/* shadow mask lines — static, they are the tube, not the signal */
+.tv-lines {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .3;
+  background: repeating-linear-gradient(to bottom,
+    rgba(0, 0, 0, .14) 0 1px,
+    transparent 1px 3px);
+}
+
+/* the vertical hold never quite holding */
+.tv-roll {
+  position: absolute;
+  inset: -20% 0 auto;
+  z-index: 0;
+  height: 22%;
+  pointer-events: none;
+  opacity: .32;
+  background: linear-gradient(to bottom,
+    transparent,
+    rgba(243, 243, 243, .05) 38%,
+    rgba(243, 243, 243, .07) 52%,
+    transparent);
+  animation: tv-roll 9s linear infinite;
+}
+
+:root[data-theme='light'] .tv-roll {
+  background: linear-gradient(to bottom,
+    transparent,
+    rgba(23, 20, 14, .05) 38%,
+    rgba(23, 20, 14, .07) 52%,
+    transparent);
+}
+
+@keyframes tv-roll {
+  from { transform: translateY(0); }
+  to { transform: translateY(600%); }
+}
+
+:root.rm .tv-roll { animation: none; opacity: 0; }
+
+/* Above the record and above the tube: nothing may sit over the wordmark. */
 .hero-inner {
   position: relative;
-  z-index: 2;
+  z-index: 4;
   width: 100%;
   max-width: var(--maxw);
   margin-inline: auto;
@@ -64,12 +157,17 @@
   font-size: var(--step--2);
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: var(--bone-40);
+  /* one step up from the usual muted tone: the static veils this text */
+  color: var(--bone-60);
   border-bottom: var(--rule);
   padding-bottom: .7rem;
 }
 
 .hero-rail b { color: var(--terra); font-weight: 700; }
+
+/* On paper the static veils this enough that the lighter terracotta drops
+   below AA; the deeper one keeps the tallies readable. */
+:root[data-theme='light'] .hero-rail b { color: var(--terra-dark); }
 
 /* --- the wordmark stack --- */
 
@@ -84,6 +182,28 @@
   text-transform: uppercase;
   display: grid;
   will-change: transform;
+}
+
+/* The drawn lockup carries the same words as the type stack, so it simply
+   takes its place. Width-led, because the artwork is wider than it is tall. */
+.hero-word--img {
+  display: block;
+  font-size: 0;
+  line-height: 0;
+}
+
+.hero-word--img img {
+  display: block;
+  width: min(44vw, 580px);
+  height: auto;
+}
+
+/* On a phone the drawn lockup and the record's own label carry the same
+   artwork, so they have to be kept apart: the lockup sits high under the rail
+   and the record drops below it. */
+@media (max-width: 860px) {
+  .hero-word--img img { width: min(66vw, 380px); }
+  .hero-type { align-self: start; padding-top: .5rem; }
 }
 
 .hero-word__line { display: block; overflow: hidden; }
@@ -114,7 +234,7 @@
   font-size: var(--step--2);
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--bone-40);
+  color: var(--bone-60);
   margin-inline-start: auto;
   align-items: center;
   gap: .6rem;
@@ -155,9 +275,9 @@
 
 @media (max-width: 860px) {
   .hero-disc {
-    top: 54%;
-    width: min(112vh, 112vw);
-    translate: calc(-50% + var(--disc-x, 14) * 1vw) -50%;
+    top: 70%;
+    width: min(96vh, 100vw);
+    translate: calc(-50% + var(--disc-x, 22) * 1vw) -50%;
     opacity: .92;
   }
 
@@ -169,7 +289,7 @@
 .aperture {
   position: absolute;
   inset: 0;
-  z-index: 5;
+  z-index: 6;
   display: grid;
   place-items: center;
   clip-path: circle(calc(var(--ap, 0) * 1%) at 50% 50%);
@@ -182,7 +302,7 @@
       rgba(223, 111, 81, .08),
       transparent 42%
     ),
-    #d7c9ac;
+    var(--paper-3);
 }
 
 /* veliki suptilni vinyl u pozadini */
@@ -395,7 +515,7 @@
 
 .selected__art { position: relative; }
 
-.selected__art .sleeve { box-shadow: 0 30px 70px rgba(0, 0, 0, .55); }
+.selected__art .sleeve { box-shadow: var(--shadow-lg); }
 
 .selected__disc {
   position: absolute;
@@ -467,7 +587,7 @@
 .paper .hours__row { border-color: var(--paper-ink-16); }
 .hours__row.is-closed { color: var(--bone-40); }
 .paper .hours__row.is-closed { color: var(--paper-ink-40); }
-.hours__row.is-today { color: var(--amber); }
+.hours__row.is-today { color: var(--terra); }
 .paper .hours__row.is-today { color: var(--terra-dark); font-weight: 700; }
 
 .contact-list { display: grid; gap: 1rem; }
@@ -512,8 +632,8 @@
   text-align: center;
   padding: 1.5rem;
   background:
-    repeating-linear-gradient(0deg, rgba(243,243,243,.035) 0 1px, transparent 1px 34px),
-    repeating-linear-gradient(90deg, rgba(243,243,243,.035) 0 1px, transparent 1px 34px);
+    repeating-linear-gradient(0deg, var(--grid-line) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(90deg, var(--grid-line) 0 1px, transparent 1px 34px);
 }
 
 .paper .map-slot {
@@ -546,6 +666,10 @@
   opacity: .38;
   pointer-events: none;
 }
+
+/* On paper the same 38% reads as a grey smudge rather than a record, so
+   the decorative discs sit heavier in the light theme. */
+:root[data-theme='light'] .page-head__disc { opacity: .6; }
 
 .page-head__inner { position: relative; z-index: 1; }
 
@@ -620,16 +744,16 @@
 
 /* sale page flavour ---------------------------------------------------- */
 
-.sale-head { background: var(--red); color: var(--bone); }
+.sale-head { background: var(--red-deep); color: var(--on-deep); }
 
 /* The red hero would swallow the transparent header's terracotta wordmark, so
    this page starts with the compact dark bar instead. */
 .is-sale .header {
-  background: rgba(14, 14, 16, .94);
+  background: var(--overlay);
   border-bottom-color: var(--bone-12);
 }
-.sale-head .crumbs { color: rgba(243, 243, 243, .6); }
-.sale-head .page-head__lede { color: rgba(243, 243, 243, .82); }
+.sale-head .crumbs { color: var(--on-deep); }
+.sale-head .page-head__lede { color: var(--on-deep); }
 
 .sale-head__title {
   font-variation-settings: 'wdth' 62, 'wght' 900;
@@ -693,7 +817,7 @@
   overflow: hidden;
   border: 1px solid var(--bone-20);
   background: var(--ink-3);
-  box-shadow: 0 40px 90px rgba(0, 0, 0, .6);
+  box-shadow: var(--shadow-xl);
 }
 
 .pdp__sleeve img { width: 100%; height: 100%; object-fit: cover; }
@@ -721,7 +845,7 @@
   transition: border-color .25s, color .25s;
 }
 
-.pdp__rpm[aria-pressed='true'] { border-color: var(--amber); color: var(--amber); }
+.pdp__rpm[aria-pressed='true'] { border-color: var(--terra); color: var(--terra); }
 
 /* right: the liner notes column */
 
@@ -783,7 +907,7 @@
   background: currentColor;
 }
 
-.pdp__status--in { color: #7fc26b; }
+.pdp__status--in { color: var(--ok); }
 .pdp__status--out { color: var(--bone-40); }
 
 /* spec table ----------------------------------------------------------- */
@@ -994,12 +1118,12 @@
 .notice {
   padding: .9rem 1rem;
   border-left: 3px solid var(--terra-dark);
-  background: rgba(223, 111, 81, .1);
+  background: var(--tint-terra);
   font-size: var(--step--1);
   color: var(--paper-ink);
 }
 
-.notice--dark { background: rgba(223, 111, 81, .1); border-color: var(--terra); color: var(--bone-80); }
+.notice--dark { background: var(--tint-terra); border-color: var(--terra); color: var(--bone-80); }
 
 .receipt {
   display: grid;
@@ -1049,7 +1173,12 @@
   color: var(--bone);
 }
 
+.paper .panel--ink { color: var(--bone); }
+.paper .panel--ink .text-dim { color: var(--bone-60); }
+.paper .panel--ink .eyebrow { color: var(--terra); }
 .panel--ink .contact-list__k { color: var(--amber); }
+/* the ink panel is a light card in the light theme, where amber is too weak */
+:root[data-theme='light'] .panel--ink .contact-list__k { color: var(--terra-dark); }
 .panel--ink .contact-list__row { border-color: var(--bone-12); }
 .panel--ink .hours__row { border-color: var(--bone-12); }
 .panel--ink .hours { border-color: var(--bone-12); }
@@ -1062,12 +1191,13 @@
   font-size: var(--step--2);
   letter-spacing: .14em;
   text-transform: uppercase;
-  color: var(--paper-ink-40);
+  /* a printed corner stamp: full ink, it is too small to be muted */
+  color: var(--paper-ink);
   border-left: 1px solid var(--paper-ink-16);
   border-bottom: 1px solid var(--paper-ink-16);
 }
 
-.panel--ink .panel__corner { color: var(--bone-40); border-color: var(--bone-12); }
+.panel--ink .panel__corner { color: var(--bone-60); border-color: var(--bone-12); }
 
 /* ==========================================================================
    PRIVACY / long form

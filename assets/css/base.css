@@ -10,36 +10,65 @@
 @import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
 
 :root {
-  /* ---- ink (vinyl) ---- */
+  /* ---- ink: the page ground and its raised surfaces ---- */
   --ink: #0e0e10;
   --ink-2: #16161a;
   --ink-3: #1f1f24;
   --ink-4: #2a2a31;
   --ink-5: #35343e;
 
-  /* ---- bone (print on black) ---- */
+  /* ---- bone: text and hairlines printed on the ground ---- */
   --bone: #f3f3f3;
-  --bone-80: rgba(243, 243, 243, .8);
-  --bone-60: rgba(243, 243, 243, .6);
-  --bone-40: rgba(243, 243, 243, .4);
+  --bone-80: rgba(243, 243, 243, .88);
+  --bone-60: rgba(243, 243, 243, .75);
+  --bone-40: rgba(243, 243, 243, .55);
   --bone-20: rgba(243, 243, 243, .2);
   --bone-12: rgba(243, 243, 243, .12);
   --bone-08: rgba(243, 243, 243, .08);
 
-  /* ---- paper (printed inner sleeve) ---- */
+  /* ---- paper: the printed inner sleeve, alternating against the ground ---- */
   --paper: #e7dcc4;
   --paper-2: #dbcdb0;
-  --board: #c6b594;
+  --paper-3: #d7c9ac;
+  --board: #d2c3a4;
   --paper-ink: #17140e;
-  --paper-ink-60: rgba(23, 20, 14, .6);
-  --paper-ink-40: rgba(23, 20, 14, .4);
+  --paper-ink-60: rgba(23, 20, 14, .76);
+  --paper-ink-40: rgba(23, 20, 14, .66);
   --paper-ink-16: rgba(23, 20, 14, .16);
 
   /* ---- brand accents ---- */
   --terra: #df6f51;
-  --terra-dark: #b8563c;
+  --terra-dark: #86341b;
   --amber: #fbb040;
   --red: #ef4136;
+  /* the brand red only reaches 3.4:1 with off-white, so fills that carry
+     text use a deeper shade and keep --red for marks and small accents */
+  --red-deep: #bf2317;
+  --ok: #7fc26b;
+
+  /* Fixed pairings. These never flip: amber and red keep their own contrast
+     colour in both themes, and a record label is terracotta with dark type
+     whatever the page around it is doing. */
+  --on-bright: #14120e;
+  --on-deep: #f6f2ea;
+  --rec-label: #df6f51;
+  --rec-label-2: #c9543a;
+  --label-fg: #17140e;
+
+  /* ---- theme-dependent effects ---- */
+  --overlay: rgba(14, 14, 16, .92);
+  --overlay-strong: rgba(14, 14, 16, .97);
+  --scrim: rgba(8, 8, 9, .72);
+  --shadow-lg: 0 30px 70px rgba(0, 0, 0, .55);
+  --shadow-xl: 0 40px 90px rgba(0, 0, 0, .6);
+  --tint-terra: rgba(223, 111, 81, .12);
+  --glow-1: rgba(223, 111, 81, .2);
+  --glow-2: rgba(251, 176, 64, .1);
+  --ph-line: rgba(243, 243, 243, .022);
+  --ph-ring: rgba(243, 243, 243, .05);
+  --grid-line: rgba(243, 243, 243, .035);
+  --grain-opacity: .5;
+  --grain-blend: overlay;
 
   /* ---- type ---- */
   --ff: 'Archivo', 'Archivo Black', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -68,6 +97,62 @@
   --header-h: 68px;
   color-scheme: dark;
 }
+
+/* ==========================================================================
+   Light theme — the sleeve, not the record.
+
+   The ground becomes printing paper and the alternating sections deepen into
+   cardboard, so the layout keeps its rhythm. Only the token values change;
+   no component knows which theme it is in. Records stay black and labels stay
+   terracotta, because that is what a record looks like.
+   ========================================================================== */
+
+:root[data-theme='light'] {
+  --ink: #f4efe4;
+  --ink-2: #ece5d6;
+  --ink-3: #e3dac7;
+  --ink-4: #d7cbb2;
+  --ink-5: #c9bb9d;
+
+  --bone: #191510;
+  --bone-80: rgba(25, 21, 16, .88);
+  --bone-60: rgba(25, 21, 16, .72);
+  /* .6, not .46: at .46 the small mono metadata fell to 2.97:1 on paper */
+  --bone-40: rgba(25, 21, 16, .6);
+  --bone-20: rgba(25, 21, 16, .26);
+  --bone-12: rgba(25, 21, 16, .17);
+  --bone-08: rgba(25, 21, 16, .11);
+
+  --paper: #e2d5b8;
+  --paper-2: #d6c69f;
+  --paper-3: #d0c09a;
+  --board: #d5c6a6;
+
+  /* darkened so accent text clears AA against paper */
+  --terra: #a8482c;
+  --terra-dark: #7d3119;
+  --amber: #b9780a;
+  --red: #c4271b;
+  --red-deep: #ab1d12;
+  --ok: #3f7f2c;
+
+  --overlay: rgba(244, 239, 228, .94);
+  --overlay-strong: rgba(244, 239, 228, .97);
+  --scrim: rgba(43, 35, 22, .42);
+  --shadow-lg: 0 24px 54px rgba(43, 32, 15, .2);
+  --shadow-xl: 0 30px 70px rgba(43, 32, 15, .24);
+  --tint-terra: rgba(168, 72, 44, .1);
+  --glow-1: rgba(223, 111, 81, .16);
+  --glow-2: rgba(251, 176, 64, .14);
+  --ph-line: rgba(25, 21, 16, .035);
+  --ph-ring: rgba(25, 21, 16, .06);
+  --grid-line: rgba(25, 21, 16, .06);
+  --grain-opacity: .3;
+  --grain-blend: multiply;
+
+  color-scheme: light;
+}
+
 
 @media (min-width: 1024px) {
   :root { --header-h: 84px; }
@@ -268,8 +353,8 @@ a:where(:not([class])) {
   inset: 0;
   z-index: 9000;
   pointer-events: none;
-  opacity: .5;
-  mix-blend-mode: overlay;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: var(--grain-blend);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.42'/%3E%3C/svg%3E");
 }
 
@@ -312,7 +397,7 @@ a:where(:not([class])) {
 .paper .btn--ghost { --btn-fg: var(--paper-ink); border-color: var(--paper-ink-40); }
 .paper .btn--ghost:hover { background: var(--paper-ink); color: var(--paper); border-color: var(--paper-ink); }
 
-.btn--sale { --btn-bg: var(--red); --btn-fg: var(--bone); }
+.btn--sale { --btn-bg: var(--red-deep); --btn-fg: var(--on-deep); }
 .btn--sale:hover { background: var(--amber); border-color: var(--amber); color: var(--ink); }
 
 .btn--block { width: 100%; }
@@ -355,7 +440,7 @@ a:where(:not([class])) {
   display: inline-block;
   padding: .3em .6em;
   background: var(--amber);
-  color: var(--ink);
+  color: var(--on-bright);
   font-family: var(--ff-mono);
   font-weight: 700;
   font-size: var(--step--1);
@@ -363,7 +448,7 @@ a:where(:not([class])) {
   transform: rotate(-1.6deg);
 }
 
-.sticker--sale { background: var(--red); color: var(--bone); }
+.sticker--sale { background: var(--red-deep); color: var(--on-deep); }
 
 /* ==========================================================================
    utilities
@@ -387,7 +472,7 @@ a:where(:not([class])) {
   z-index: 9999;
   padding: .75rem 1.25rem;
   background: var(--amber);
-  color: var(--ink);
+  color: var(--on-bright);
   font-family: var(--ff-mono);
   font-size: var(--step--1);
   letter-spacing: .12em;

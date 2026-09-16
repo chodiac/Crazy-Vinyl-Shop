@@ -6,6 +6,7 @@
    ========================================================================== */
 
 import * as cart from './cart.js';
+import { url, productUrl, imageUrl, isCurrent } from './paths.js';
 import {
   loadProducts, loadSite, loadImageManifest, searchProducts,
   formatPrice, taxonomyLine, isOnSale, effectivePrice, displayName,
@@ -155,33 +156,18 @@ export function toast(message, variant = '') {
 
 /**
  * A CSS-drawn record. `spin` registers it with the scroll-velocity engine.
- * @param {{label?:string, sub?:string, spin?:boolean, speed?:number, orbit?:string, className?:string}} o
+ * @param {{label?:string, spin?:boolean, speed?:number, className?:string}} o
  */
 export function vinylMarkup(o = {}) {
-  const {
-    label = 'CVS', sub = 'KRAGUJEVAC', spin = true, speed = 1,
-    orbit = '', className = '',
-  } = o;
-
-  const orbitSvg = orbit ? `
-    <svg class="orbit orbit--spin" viewBox="0 0 100 100" aria-hidden="true">
-      <defs><path id="oc-${cssId(orbit)}" d="M50,50 m-43,0 a43,43 0 1,1 86,0 a43,43 0 1,1 -86,0"/></defs>
-      <text><textPath href="#oc-${cssId(orbit)}" startOffset="0">${esc(orbit)}</textPath></text>
-    </svg>` : '';
-
+  const { label = 'CVS', spin = true, speed = 1, className = '' } = o;
   return `
     <div class="vinyl ${className}" aria-hidden="true">
-      <div class="vinyl__spin" data-spin${spin ? '' : '="off"'} data-speed="${speed}"></div>
-      <div class="vinyl__label">
-        <span class="vinyl__labeltype"><strong>${esc(label)}</strong>${sub ? esc(sub) : ''}</span>
+      <div class="vinyl__spin" data-spin${spin ? '' : '="off"'} data-speed="${speed}">
+        <div class="vinyl__label">${label ? `<span class="vinyl__labeltype">${esc(label)}</span>` : ''}</div>
       </div>
       <span class="vinyl__hole"></span>
-      ${orbitSvg}
     </div>`;
 }
-
-let idSeed = 0;
-function cssId(s) { idSeed += 1; return `${s.replace(/[^a-z0-9]/gi, '').slice(0, 8).toLowerCase()}${idSeed}`; }
 
 /* --------------------------------------------------------------------------
    artwork — designed placeholder until a real file exists
@@ -229,7 +215,7 @@ export async function mountArtwork(root = document) {
     slot.dataset.artDone = '1';
     if (!manifest.has(slug)) return;
     const img = new Image();
-    img.src = `/images/products/${slug}.jpg`;
+    img.src = imageUrl(slug);
     img.alt = slot.dataset.artAlt || '';
     img.loading = 'lazy';
     img.decoding = 'async';
@@ -269,7 +255,7 @@ export function productCard(p, { index, showAdd = true } = {}) {
       <a class="card__link" href="${esc(p.href)}">
         <div class="card__crate">
           <div class="card__disc vinyl" aria-hidden="true">
-            <div class="vinyl__label"><span class="vinyl__labeltype"><strong>${esc((p.artist || p.title || 'CVS').slice(0, 3).toUpperCase())}</strong></span></div>
+            <div class="vinyl__label"><span class="vinyl__labeltype">${esc((p.artist || p.title || 'CVS').slice(0, 3).toUpperCase())}</span></div>
             <span class="vinyl__hole"></span>
           </div>
           ${artworkMarkup(p)}
@@ -358,6 +344,83 @@ export function wireAddButtons(products) {
     bubble?.classList.add('is-bumped');
     window.setTimeout(() => bubble?.classList.remove('is-bumped'), 500);
     toast(`${displayName(product)} — dodato u korpu`);
+  });
+}
+
+/* --------------------------------------------------------------------------
+   theme
+
+   The head sets data-theme before first paint; this only handles the toggle
+   and remembers the choice. Nothing else in the CSS or JS knows which theme
+   is active — it is all token values.
+   -------------------------------------------------------------------------- */
+
+const THEME_KEY = 'cvs.theme';
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+
+  const toLight = theme === 'dark';
+  $$('[data-theme-toggle]').forEach((btn) => {
+    btn.setAttribute('aria-label', toLight ? 'Prebaci na svetlu temu' : 'Prebaci na tamnu temu');
+    btn.setAttribute('title', toLight ? 'Svetla tema' : 'Tamna tema');
+    if (btn.hasAttribute('data-theme-label')) btn.textContent = toLight ? 'Svetla tema' : 'Tamna tema';
+  });
+
+  const meta = $('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', theme === 'light' ? '#f4efe4' : '#0e0e10');
+}
+
+/* --------------------------------------------------------------------------
+   motion preference
+
+   The operating system's reduced-motion setting is the default, but it is a
+   default, not a verdict: a visitor who wants the record to spin can say so and
+   it sticks. That is what the `?motion=1` flag used to be needed for.
+   -------------------------------------------------------------------------- */
+
+const MOTION_KEY = 'cvs.motion';
+
+function motionLabel() {
+  const on = !prefersReducedMotion();
+  $$('[data-motion-toggle]').forEach((btn) => {
+    btn.textContent = on ? 'Animacije: uključene' : 'Animacije: isključene';
+    btn.setAttribute('aria-pressed', String(on));
+    btn.setAttribute('title', on ? 'Isključi animacije' : 'Uključi animacije');
+  });
+}
+
+function initMotionPref() {
+  motionLabel();
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-motion-toggle]');
+    if (!btn) return;
+    e.preventDefault();
+    const next = prefersReducedMotion() ? 'full' : 'reduced';
+    try { localStorage.setItem(MOTION_KEY, next); } catch { /* private mode */ }
+    // The hero rig, spinners and reveals are built from this at boot, so the
+    // honest way to apply it is a reload rather than half-rewiring them.
+    location.reload();
+  });
+}
+
+function initTheme() {
+  const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  applyTheme(current);
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-theme-toggle]');
+    if (!btn) return;
+    e.preventDefault();
+    const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    applyTheme(next);
+    try { localStorage.setItem(THEME_KEY, next); } catch { /* private mode */ }
+  });
+
+  // another tab changed it
+  window.addEventListener('storage', (e) => {
+    if (e.key === THEME_KEY && (e.newValue === 'light' || e.newValue === 'dark')) applyTheme(e.newValue);
   });
 }
 
@@ -470,7 +533,7 @@ async function initSearch() {
     if (e.key === 'Enter') {
       e.preventDefault();
       const q = input.value.trim();
-      if (q) window.location.href = `/proizvodi/?q=${encodeURIComponent(q)}`;
+      if (q) window.location.href = url(`proizvodi/?q=${encodeURIComponent(q)}`);
     }
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -492,7 +555,7 @@ function lineMarkup(l) {
       <span class="line__art" data-art="${esc(l.slug)}"><span class="ph__code">IMG</span></span>
       <div>
         <div class="line__head">
-          <a href="/proizvod/${esc(l.slug)}/">
+          <a href="${esc(productUrl(l.slug))}">
             ${l.artist ? `<span class="line__artist">${esc(l.artist)}</span>` : ''}
             <span class="line__title">${esc(l.title || l.slug)}</span>
           </a>
@@ -540,9 +603,9 @@ function initCartDrawer() {
     if (!state.lines.length) {
       body.innerHTML = `
         <div class="drawer__empty">
-          <div style="width:120px">${vinylMarkup({ label: 'CVS', sub: '33⅓', spin: false })}</div>
+          <div style="width:120px">${vinylMarkup({ label: 'CVS', spin: false })}</div>
           <p class="t-meta text-dim">Korpa je prazna</p>
-          <a class="btn btn--ghost" href="/proizvodi/" data-close-cart>Nastavi kupovinu</a>
+          <a class="btn btn--ghost" href="${esc(url('proizvodi/'))}" data-close-cart>Nastavi kupovinu</a>
         </div>`;
       foot.innerHTML = '';
       return;
@@ -556,9 +619,9 @@ function initCartDrawer() {
         <div class="totals__row"><span>Dostava</span><span>Računa se na kasi</span></div>
         <div class="totals__row totals__row--grand"><span>Ukupno</span><span>${formatPrice(state.subtotal)}</span></div>
       </div>
-      <a class="btn btn--block" href="/checkout/">Na kasu</a>
+      <a class="btn btn--block" href="${esc(url('checkout/'))}">Na kasu</a>
       <div style="display:grid;grid-auto-flow:column;gap:.6rem">
-        <a class="btn btn--ghost" href="/korpa/">Korpa</a>
+        <a class="btn btn--ghost" href="${esc(url('korpa/'))}">Korpa</a>
         <button type="button" class="btn btn--ghost" data-cart-clear>Isprazni</button>
       </div>`;
   });
@@ -593,13 +656,9 @@ export function buildMarquee(host, items) {
    -------------------------------------------------------------------------- */
 
 function markCurrent() {
-  const path = location.pathname.replace(/index\.html$/, '');
-  $$('a[href]').forEach((a) => {
-    const href = a.getAttribute('href');
-    if (!href || !href.startsWith('/')) return;
-    if (href === path && (a.closest('.nav') || a.closest('.mobile-menu') || a.closest('.cat-rail'))) {
-      a.setAttribute('aria-current', 'page');
-    }
+  // resolved URLs, so this works with relative hrefs at any depth
+  $$('.nav a[href], .mobile-menu a[href], .cat-rail a[href]').forEach((a) => {
+    if (isCurrent(a.href)) a.setAttribute('aria-current', 'page');
   });
 }
 
@@ -609,6 +668,8 @@ function markCurrent() {
 
 export async function initChrome() {
   document.documentElement.classList.remove('no-js');
+  initTheme();
+  initMotionPref();
   initHeader();
   initMobileMenu();
   initCartDrawer();
