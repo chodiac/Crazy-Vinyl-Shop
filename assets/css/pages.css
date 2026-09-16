@@ -713,18 +713,33 @@
 
 .cat-rail {
   display: flex;
-  justify-content: center; /* DODAJ OVO */
+
+  /* `safe` matters: a plain `center` that overflows spills equally past both
+     ends and the first tab can no longer be scrolled to. Safe centring falls
+     back to start-alignment the moment the tabs stop fitting. */
+  justify-content: safe center;
+
   gap: .4rem;
-  overflow-x: auto;
   padding-block: .8rem;
+  padding-inline: var(--gut);
   border-block: var(--rule);
-  scrollbar-width: thin;
+
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--gut);
+
+  /* the faded ends say it scrolls; a scrollbar under seven pills does not */
+  scrollbar-width: none;
 }
+
+.cat-rail::-webkit-scrollbar { display: none; }
 
 .paper .cat-rail { border-color: var(--paper-ink-16); }
 
 .cat-rail__link {
   flex: none;
+  scroll-snap-align: center;
   padding: .5em .85em;
   border: 1px solid var(--bone-20);
   font-family: var(--ff-mono);
@@ -747,6 +762,18 @@
 .paper .cat-rail__link { border-color: var(--paper-ink-16); color: var(--paper-ink-60); }
 .paper .cat-rail__link:hover { color: var(--paper-ink); border-color: var(--paper-ink-40); }
 .paper .cat-rail__link[aria-current='page'] { background: var(--paper-ink); border-color: var(--paper-ink); color: var(--paper); }
+
+/* On a phone the rail always overflows: fade what runs off the edges so it
+   reads as a strip you can push, and give the tabs a real thumb-sized target. */
+@media (max-width: 720px) {
+  .cat-rail {
+    --fade: 1.25rem;
+    -webkit-mask-image: linear-gradient(90deg, #0000, #000 var(--fade), #000 calc(100% - var(--fade)), #0000);
+    mask-image: linear-gradient(90deg, #0000, #000 var(--fade), #000 calc(100% - var(--fade)), #0000);
+  }
+
+  .cat-rail__link { padding: .7em 1em; }
+}
 
 /* sale page flavour ---------------------------------------------------- */
 

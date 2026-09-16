@@ -111,7 +111,15 @@ export function createOverlay({ panel, scrim, triggers = [], closers = [], initi
   };
 
   triggers.forEach((t) => t.addEventListener('click', (e) => { e.preventDefault(); setState(!open); }));
-  closers.forEach((c) => c.addEventListener('click', (e) => { e.preventDefault(); setState(false); }));
+  closers.forEach((c) => c.addEventListener('click', (e) => {
+    // A closer that is also a real link has to be left alone to navigate.
+    // Every link in the mobile menu carries data-close-menu, so cancelling the
+    // default here killed the entire menu on touch devices: the panel closed
+    // and the page never changed.
+    const href = c.tagName === 'A' ? c.getAttribute('href') : null;
+    if (href === null || href === '#') e.preventDefault();
+    setState(false);
+  }));
   scrim?.addEventListener('click', () => setState(false));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) setState(false); });
 
@@ -669,6 +677,16 @@ function markCurrent() {
   $$('.nav a[href], .mobile-menu a[href], .cat-rail a[href]').forEach((a) => {
     if (isCurrent(a.href)) a.setAttribute('aria-current', 'page');
   });
+
+  // The rail is centred, so on a narrow screen it opens showing its middle and
+  // the tab you are actually on can be off to one side. Put it in view.
+  const rail = $('.cat-rail');
+  const here = rail && $('[aria-current="page"]', rail);
+  if (here && rail.scrollWidth > rail.clientWidth) {
+    rail.scrollLeft += here.getBoundingClientRect().left
+      - rail.getBoundingClientRect().left
+      - (rail.clientWidth - here.offsetWidth) / 2;
+  }
 }
 
 /* --------------------------------------------------------------------------
