@@ -394,3 +394,26 @@ not change anyone's actual setting.
   a title. Those render title-only.
 - `addedAt` comes from the real publish date on the live site, so "Najnovije"
   sorting is genuine rather than approximated.
+
+## Admin panel (CMS)
+
+The site's text and images are editable without touching code, at `/admin/`.
+
+- **How it works** and setup: [docs/CMS-SETUP.md](docs/CMS-SETUP.md)
+- **Owner's guide** (Serbian): [docs/CMS-UPUTSTVO.md](docs/CMS-UPUTSTVO.md)
+
+Short version: Supabase holds the content, the admin panel edits a draft,
+publishing copies draft to published and triggers a GitHub Actions rebuild.
+The public site stays static HTML, so every heading and meta description is
+still in the rendered page.
+
+`data/*.json` remains the fallback and the seed — `python tools/build.py`
+works with no credentials at all.
+
+| Path | What it is |
+| --- | --- |
+| `admin/` | the panel (static, vanilla ES modules) |
+| `supabase/migrations/` | schema, RLS policies, seed |
+| `supabase/functions/publish/` | Edge Function that triggers the rebuild |
+| `tools/content.py` | Supabase to `data/*.json` and back |
+| `.github/workflows/build-deploy.yml` | build and deploy |

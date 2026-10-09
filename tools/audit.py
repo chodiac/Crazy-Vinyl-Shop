@@ -15,7 +15,9 @@ import sys
 from collections import Counter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SKIP_DIRS = {'.git', 'tools', 'node_modules', '.claude'}
+# admin/ is the CMS app, not a generated page: it has its own stylesheet and
+# entry script, and nothing links to it from the site.
+SKIP_DIRS = {'.git', 'tools', 'node_modules', '.claude', 'admin', 'supabase'}
 
 HREF = re.compile(r'(?:href|src)="([^"]+)"')
 EXTERNAL = re.compile(r'^(?:[a-z][a-z0-9+.-]*:|//|#)', re.I)

@@ -55,11 +55,22 @@ export const loadCategories = () => getJSON('categories');
 let imagesPromise = null;
 
 /** Set of slugs with a real artwork file, so we never request a missing one. */
+/**
+ * Artwork manifest as a Map: slug -> { url, alt }.
+ *
+ * The build writes an object keyed by slug. Older builds wrote a bare array of
+ * slugs, so that shape is still accepted and resolved to the repo path.
+ */
 export function loadImageManifest() {
   if (!imagesPromise) {
     imagesPromise = getJSON('images')
-      .then((list) => new Set(list))
-      .catch(() => new Set());
+      .then((data) => {
+        if (Array.isArray(data)) {
+          return new Map(data.map((slug) => [slug, { url: '', alt: '' }]));
+        }
+        return new Map(Object.entries(data || {}));
+      })
+      .catch(() => new Map());
   }
   return imagesPromise;
 }

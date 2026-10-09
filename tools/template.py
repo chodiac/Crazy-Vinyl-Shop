@@ -94,8 +94,18 @@ def marquee(items, klass='', reverse=False, speed='42s'):
     </div>'''
 
 
-def eyebrow(text, paper=False):
-    return f'<p class="eyebrow{" eyebrow--paper" if paper else ""}">{e(text)}</p>'
+def cms(key):
+    """Marks the element that renders a CMS field.
+
+    The admin preview loads a real published page in an iframe and swaps these
+    nodes for the draft values, so a draft can be seen in the actual layout
+    without waiting for a rebuild. On the public site the attribute is inert.
+    """
+    return f' data-cms="{e(key)}"' if key else ''
+
+
+def eyebrow(text, paper=False, key=''):
+    return f'<p class="eyebrow{" eyebrow--paper" if paper else ""}"{cms(key)}>{e(text)}</p>'
 
 
 def crumbs(items):

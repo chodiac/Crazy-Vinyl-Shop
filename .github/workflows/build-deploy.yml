@@ -1,0 +1,69 @@
+name: Build and deploy
+
+# Three ways in:
+#   cms-publish     fired by the publish Edge Function when an admin publishes
+#   workflow_dispatch  the "Run workflow" button, which also works before the
+#                      Edge Function is set up
+#   push            an ordinary code change on main
+on:
+  repository_dispatch:
+    types: [cms-publish]
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+# Deploying is the one thing that must not run twice at once; a publish that
+# arrives mid-build waits and then supersedes the queued one.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install build dependencies
+        run: pip install --disable-pip-version-check pillow
+
+      # Published content replaces data/*.json. If the secrets are missing the
+      # step is skipped and the build falls back to the files in the repo, so a
+      # code-only push still deploys a correct site.
+      - name: Pull published content from Supabase
+        if: ${{ secrets.SUPABASE_URL != '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python tools/content.py pull
+
+      - name: Build
+        run: python tools/build.py
+
+      - name: Audit
+        run: python tools/audit.py
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

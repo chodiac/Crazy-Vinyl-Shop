@@ -19,9 +19,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script>(function(){var d=document.documentElement;d.classList.remove('no-js');var t='light';try{var v=localStorage.getItem('cvs.theme');if(v==='light'||v==='dark')t=v;}catch(e){}d.setAttribute('data-theme',t);var m=null;try{m=localStorage.getItem('cvs.motion');}catch(e){}if(/[?&]motion=(1|force)/.test(location.search))m='full';else if(/[?&]motion=0/.test(location.search))m='reduced';if(m==='reduced')d.classList.add('rm');})();</script>
-<link rel="stylesheet" href="./assets/css/base.css?v=99922431">
-<link rel="stylesheet" href="./assets/css/components.css?v=99922431">
-<link rel="stylesheet" href="./assets/css/pages.css?v=99922431">
+<link rel="stylesheet" href="./assets/css/base.css?v=6cf3089a">
+<link rel="stylesheet" href="./assets/css/components.css?v=6cf3089a">
+<link rel="stylesheet" href="./assets/css/pages.css?v=6cf3089a">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Store", "name": "Crazy Vinyl Shop", "url": "https://crazyvinylshop.rs", "telephone": "+381 65 9966 623", "email": "crazyvinylshopkg@gmail.com", "address": {"@type": "PostalAddress", "streetAddress": "Crvenog Barjaka 21", "addressLocality": "Kragujevac", "addressCountry": "RS"}, "sameAs": ["https://www.facebook.com/crazyvinylshop/", "https://www.instagram.com/crazyvinylshop/?hl=en"]}</script>
 </head>
 <body data-page="home" class="">
@@ -141,13 +141,13 @@
 
       <div class="hero-type">
         <h1 class="hero-word hero-word--img"><img src="./images/gen/natpislogo2-1000.webp" alt="Crazy Vinyl Shop"></h1>
-        <p class="hero-lede">Prodavnica gramofonskih ploča, diskova i muzičke robe. Radnja u Kragujevcu i onlajn katalog.</p>
+        <p class="hero-lede"><span data-cms="site.brand.tagline">Prodavnica gramofonskih ploča, diskova i muzičke robe</span>. <span data-cms="home.heroLedeSuffix">Radnja u Kragujevcu i onlajn katalog.</span></p>
       </div>
 
       <div class="hero-actions">
-        <a class="btn" href="./proizvodi/">Istraži kolekciju</a>
-        <a class="btn btn--ghost" href="./rasprodaja/">Rasprodaja</a>
-        <span class="hero-scroll"><span class="hero-scroll__line" aria-hidden="true"></span> Skroluj u ploču</span>
+        <a class="btn" href="./proizvodi/" data-cms="home.heroPrimaryLabel">Istraži kolekciju</a>
+        <a class="btn btn--ghost" href="./rasprodaja/" data-cms="home.heroSecondaryLabel">Rasprodaja</a>
+        <span class="hero-scroll"><span class="hero-scroll__line" aria-hidden="true"></span> <span data-cms="home.heroScrollHint">Skroluj u ploču</span></span>
       </div>
     </div>
 
@@ -165,8 +165,8 @@
 
 <section class="section paper grooved section--under-hero" id="ponuda">
   <div class="wrap">
-    <p class="eyebrow eyebrow--paper">Odeljenja / Sections</p>
-    <h2 class="t-display t-display--lg" style="padding-block:.6rem 1.5rem">Prođi kroz gajbe</h2>
+    <p class="eyebrow eyebrow--paper" data-cms="home.departmentsEyebrow">Odeljenja / Sections</p>
+    <h2 class="t-display t-display--lg" style="padding-block:.6rem 1.5rem" data-cms="home.departmentsTitle">Prođi kroz gajbe</h2>
     <div class="crate"><a class="crate__row" href="./ploce/">
         <span class="crate__n">001</span>
         <span>
@@ -225,10 +225,10 @@
   <div class="wrap">
     <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;justify-content:space-between">
       <div>
-        <p class="eyebrow">Novo u ponudi</p>
-        <h2 class="t-display t-display--lg" style="padding-top:.5rem">Sveže na polici</h2>
+        <p class="eyebrow" data-cms="home.newInEyebrow">Novo u ponudi</p>
+        <h2 class="t-display t-display--lg" style="padding-top:.5rem" data-cms="home.newInTitle">Sveže na polici</h2>
       </div>
-      <a class="link-cat" href="./proizvodi/?sort=newest">Ceo katalog</a>
+      <a class="link-cat" href="./proizvodi/?sort=newest" data-cms="home.newInLinkLabel">Ceo katalog</a>
     </div>
     <div class="grid-products" id="newIn" style="padding-top:2rem"></div>
   </div>
@@ -243,8 +243,8 @@
 
 <section class="section">
   <div class="wrap">
-    <p class="eyebrow">Izbor radnje / Selected</p>
-    <h2 class="t-display t-display--lg" style="padding-block:.5rem 2rem">Sa gramofona</h2>
+    <p class="eyebrow" data-cms="home.selectedEyebrow">Izbor radnje / Selected</p>
+    <h2 class="t-display t-display--lg" style="padding-block:.5rem 2rem" data-cms="home.selectedTitle">Sa gramofona</h2>
     <div class="selected" id="selected"></div>
   </div>
 </section>
@@ -253,10 +253,10 @@
   <div class="wrap">
     <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;justify-content:space-between">
       <div>
-        <p class="eyebrow eyebrow--paper">Rasprodaja</p>
-        <h2 class="t-display t-display--lg" style="padding-top:.5rem">Sniženo <span id="saleCount">0</span></h2>
+        <p class="eyebrow eyebrow--paper" data-cms="home.saleEyebrow">Rasprodaja</p>
+        <h2 class="t-display t-display--lg" style="padding-top:.5rem"><span data-cms="home.saleTitle">Sniženo</span> <span id="saleCount">0</span></h2>
       </div>
-      <a class="link-cat" href="./rasprodaja/">Stranica rasprodaje</a>
+      <a class="link-cat" href="./rasprodaja/" data-cms="home.saleLinkLabel">Stranica rasprodaje</a>
     </div>
     <div class="grid-products" id="saleBand" style="padding-top:2rem"></div>
   </div>
@@ -264,11 +264,11 @@
 
 <section class="section paper" id="radnja">
   <div class="wrap">
-    <p class="eyebrow eyebrow--paper">Radnja / Kragujevac</p>
-    <h2 class="t-display t-display--lg" style="padding-block:.5rem 2rem">Dođi i prelistaj</h2>
+    <p class="eyebrow eyebrow--paper" data-cms="home.storeEyebrow">Radnja / Kragujevac</p>
+    <h2 class="t-display t-display--lg" style="padding-block:.5rem 2rem" data-cms="home.storeTitle">Dođi i prelistaj</h2>
     <div class="band">
       <div>
-        <p class="t-body">Crazy Vinyl Shop je fizička radnja u Kragujevcu. Ploče, diskovi i ostalo stoje na policama — može se pregledati, slušati i pitati. Onlajn katalog je ista roba, samo popisana.</p>
+        <p class="t-body" data-cms="home.storeBody">Crazy Vinyl Shop je fizička radnja u Kragujevcu. Ploče, diskovi i ostalo stoje na policama — može se pregledati, slušati i pitati. Onlajn katalog je ista roba, samo popisana.</p>
         <div class="hours" style="margin-top:1.5rem"><div class="hours__row"><span>Ponedeljak</span><span>12AM – 9PM</span></div><div class="hours__row"><span>Utorak</span><span>12AM – 9PM</span></div><div class="hours__row"><span>Sreda</span><span>12AM – 9PM</span></div><div class="hours__row"><span>Četvrtak</span><span>12AM – 9PM</span></div><div class="hours__row"><span>Petak</span><span>12AM – 9PM</span></div><div class="hours__row"><span>Subota</span><span>10AM – 9PM</span></div><div class="hours__row is-closed"><span>Nedelja</span><span>Zatvoreno</span></div></div>
       </div>
       <div class="panel">
@@ -287,7 +287,7 @@
             <span class="contact-list__v"><a href="mailto:crazyvinylshopkg@gmail.com">crazyvinylshopkg@gmail.com</a></span>
           </div>
         </div>
-        <a class="btn btn--ghost" href="./kontakt/">Kontakt &amp; Tattoo</a>
+        <a class="btn btn--ghost" href="./kontakt/" data-cms="home.storeCtaLabel">Kontakt &amp; Tattoo</a>
       </div>
     </div>
   </div>
@@ -297,9 +297,9 @@
   <div class="wrap">
     <div class="band">
       <div>
-        <p class="eyebrow">Tattoo studio</p>
-        <h2 class="t-display t-display--lg" style="padding-block:.5rem 1rem">Sicario Tattoo Studio</h2>
-        <p class="t-body text-dim">Tattoo studio deli prostor sa prodavnicom u Kragujevcu. Za termine i konsultacije javite se direktno studiju.</p>
+        <p class="eyebrow" data-cms="home.tattooEyebrow">Tattoo studio</p>
+        <h2 class="t-display t-display--lg" style="padding-block:.5rem 1rem" data-cms="site.tattoo.name">Sicario Tattoo Studio</h2>
+        <p class="t-body text-dim" data-cms="site.tattoo.note">Tattoo studio deli prostor sa prodavnicom u Kragujevcu. Za termine i konsultacije javite se direktno studiju.</p>
       </div>
       <div class="panel panel--ink">
         <span class="panel__corner">Sicario</span>
@@ -376,6 +376,6 @@
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script type="module" src="./assets/js/main.js?v=99922431"></script>
+<script type="module" src="./assets/js/main.js?v=6cf3089a"></script>
 </body>
 </html>

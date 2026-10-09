@@ -19,9 +19,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script>(function(){var d=document.documentElement;d.classList.remove('no-js');var t='light';try{var v=localStorage.getItem('cvs.theme');if(v==='light'||v==='dark')t=v;}catch(e){}d.setAttribute('data-theme',t);var m=null;try{m=localStorage.getItem('cvs.motion');}catch(e){}if(/[?&]motion=(1|force)/.test(location.search))m='full';else if(/[?&]motion=0/.test(location.search))m='reduced';if(m==='reduced')d.classList.add('rm');})();</script>
-<link rel="stylesheet" href="../assets/css/base.css?v=99922431">
-<link rel="stylesheet" href="../assets/css/components.css?v=99922431">
-<link rel="stylesheet" href="../assets/css/pages.css?v=99922431">
+<link rel="stylesheet" href="../assets/css/base.css?v=6cf3089a">
+<link rel="stylesheet" href="../assets/css/components.css?v=6cf3089a">
+<link rel="stylesheet" href="../assets/css/pages.css?v=6cf3089a">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Store", "name": "Crazy Vinyl Shop", "address": {"@type": "PostalAddress", "streetAddress": "Crvenog Barjaka 21", "addressLocality": "Kragujevac", "addressCountry": "RS"}, "telephone": "+381 65 9966 623", "email": "crazyvinylshopkg@gmail.com"}</script>
 </head>
 <body data-page="contact" class="">
@@ -136,8 +136,8 @@
       </div></div>
   <div class="wrap page-head__inner">
     <nav aria-label="Putanja"><ol class="crumbs"><li><a href="../">Početna</a></li><li><span>Kontakt &amp; Tattoo</span></li></ol></nav>
-    <h1 class="page-head__title">Kontakt<br>&amp; Tattoo</h1>
-    <p class="page-head__lede">Radnja i tattoo studio dele istu adresu u Kragujevcu. Pozovite, pišite ili dođite.</p>
+    <h1 class="page-head__title"><span data-cms="contact.titleLine1">Kontakt</span><br><span data-cms="contact.titleLine2">&amp; Tattoo</span></h1>
+    <p class="page-head__lede" data-cms="contact.lede">Radnja i tattoo studio dele istu adresu u Kragujevcu. Pozovite, pišite ili dođite.</p>
   </div>
 </section>
 
@@ -194,7 +194,7 @@
     </div>
 
     <div style="padding-top:clamp(2rem,1rem+3vw,4rem)">
-      <p class="eyebrow eyebrow--paper">Lokacija</p>
+      <p class="eyebrow eyebrow--paper" data-cms="contact.mapEyebrow">Lokacija</p>
       <div class="map-embed" style="margin-top:.9rem">
         <iframe
           src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5058.979196834431!2d20.91077437619572!3d44.011167671087414!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47572182fe1f03eb%3A0xcf478c351c2d3859!2sCrazy%20Vinyl%20Shop!5e1!3m2!1sen!2srs!4v1789569888680!5m2!1sen!2srs"
@@ -204,17 +204,17 @@
           referrerpolicy="strict-origin-when-cross-origin"></iframe>
       </div>
       <p class="t-meta" style="padding-top:.8rem">
-        <a class="link-cat" href="https://www.google.com/maps/search/?api=1&amp;query=Crvenog+Barjaka+21,+Kragujevac,+SRBIJA" target="_blank" rel="noopener">Otvori u Google mapama</a>
+        <a class="link-cat" href="https://www.google.com/maps/search/?api=1&amp;query=Crvenog+Barjaka+21,+Kragujevac,+SRBIJA" target="_blank" rel="noopener" data-cms="contact.mapLinkLabel">Otvori u Google mapama</a>
       </p>
     </div>
 
     <div style="padding-top:clamp(2rem,1rem+3vw,4rem)">
-      <p class="eyebrow eyebrow--paper">Poručivanje i dostava</p>
-      <h2 class="t-display" style="padding-block:.5rem 1rem">Kako ide isporuka</h2>
+      <p class="eyebrow eyebrow--paper" data-cms="contact.deliveryEyebrow">Poručivanje i dostava</p>
+      <h2 class="t-display" style="padding-block:.5rem 1rem" data-cms="contact.deliveryTitle">Kako ide isporuka</h2>
       <div class="t-body">
-        <p>Narudžbenica se šalje sa stranice Kasa. Isporuka i plaćanje idu preko Post Express-a — pouzećem u Srbiji, export u inostranstvo. Troškovi dostave za Srbiju se obračunavaju po
-        <a href="http://www.postexpress.rs/struktura/lat/cenovnik/cenovnik-unutrasnji-saobracaj.asp" target="_blank" rel="noopener">cenovniku Post Express-a</a>, a za inostranstvo po zonama koje se vide na kasi.</p>
-        <p>Za pitanja o stanju ploče, rezervaciji ili ličnom preuzimanju u radnji — pozovite ili pišite.</p>
+        <p><span data-cms="contact.deliveryBodyBefore">Narudžbenica se šalje sa stranice Kasa. Isporuka i plaćanje idu preko Post Express-a — pouzećem u Srbiji, export u inostranstvo. Troškovi dostave za Srbiju se obračunavaju po</span>
+        <a href="http://www.postexpress.rs/struktura/lat/cenovnik/cenovnik-unutrasnji-saobracaj.asp" target="_blank" rel="noopener" data-cms="contact.deliveryLinkLabel">cenovniku Post Express-a</a><span data-cms="contact.deliveryBodyAfter">, a za inostranstvo po zonama koje se vide na kasi.</span></p>
+        <p data-cms="contact.deliveryNote">Za pitanja o stanju ploče, rezervaciji ili ličnom preuzimanju u radnji — pozovite ili pišite.</p>
       </div>
     </div>
   </div>
@@ -278,6 +278,6 @@
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script type="module" src="../assets/js/main.js?v=99922431"></script>
+<script type="module" src="../assets/js/main.js?v=6cf3089a"></script>
 </body>
 </html>

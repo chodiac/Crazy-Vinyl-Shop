@@ -1,0 +1,11 @@
+# Secrets. The service-role key must never reach the repository.
+.env
+.env.*
+!.env.example
+
+__pycache__/
+*.pyc
+
+# Local preview scratch
+.DS_Store
+Thumbs.db

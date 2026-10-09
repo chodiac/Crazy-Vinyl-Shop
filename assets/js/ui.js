@@ -221,10 +221,14 @@ export async function mountArtwork(root = document) {
   function inject(slot) {
     const slug = slot.dataset.art;
     slot.dataset.artDone = '1';
-    if (!manifest.has(slug)) return;
+    const entry = manifest.get(slug);
+    if (!entry) return;
     const img = new Image();
-    img.src = imageUrl(slug);
-    img.alt = slot.dataset.artAlt || '';
+    // An absolute URL comes from the CMS; a repo path still has to be resolved
+    // against the page's depth, which is what imageUrl does.
+    img.src = /^https?:\/\//.test(entry.url) ? entry.url
+      : (entry.url ? url(entry.url.replace(/^\//, '')) : imageUrl(slug));
+    img.alt = entry.alt || slot.dataset.artAlt || '';
     img.loading = 'lazy';
     img.decoding = 'async';
     img.addEventListener('load', () => {

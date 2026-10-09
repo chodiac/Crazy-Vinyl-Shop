@@ -22,7 +22,7 @@ from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from template import (  # noqa: E402
-    e, page, vinyl, marquee, eyebrow, crumbs, set_logos, set_asset_version,
+    e, page, vinyl, marquee, eyebrow, crumbs, cms, set_logos, set_asset_version,
     SITE_URL,
 )
 
@@ -173,14 +173,15 @@ FILTER_SHEET = f'''<aside class="sheet" id="filterSheet" role="dialog" aria-moda
 </aside>'''
 
 
-def shop_head(*, title, lede, breadcrumb=None, head_class='', title_class='page-head__title'):
+def shop_head(*, title, lede, breadcrumb=None, head_class='', title_class='page-head__title',
+              title_key='', lede_key=''):
     bc = crumbs(breadcrumb) if breadcrumb else ''
-    lede_html = f'<p class="page-head__lede">{lede}</p>' if lede else ''
+    lede_html = f'<p class="page-head__lede"{cms(lede_key)}>{lede}</p>' if lede else ''
     return f'''<section class="page-head {head_class}">
   <div class="page-head__disc" aria-hidden="true">{vinyl(label='CVS', speed=0.7)}</div>
   <div class="wrap page-head__inner">
     {bc}
-    <h1 class="{title_class}">{title}</h1>
+    <h1 class="{title_class}"{cms(title_key)}>{title}</h1>
     {lede_html}
   </div>
 </section>'''
@@ -231,7 +232,7 @@ def shop_body(**kw):
 # home
 # ---------------------------------------------------------------------------
 
-def home_body(site, categories, counts, products, wordmark=None):
+def home_body(site, categories, counts, products, pages, wordmark=None):
     # The drawn lockup says the same thing as the type stack, so the alt text
     # carries it and the heading stays a real heading either way.
     if wordmark:
@@ -245,6 +246,7 @@ def home_body(site, categories, counts, products, wordmark=None):
                          '<span class="hero-word__line"><span>Shop</span></span></h1>')
     store = site['store']
     tattoo = site['tattoo']
+    h = pages['home']
     total = len(products)
     avail = sum(1 for p in products if p['available'])
 
@@ -283,13 +285,13 @@ def home_body(site, categories, counts, products, wordmark=None):
 
       <div class="hero-type">
         {hero_wordmark}
-        <p class="hero-lede">{e(site['brand']['tagline'])}. Radnja u Kragujevcu i onlajn katalog.</p>
+        <p class="hero-lede"><span data-cms="site.brand.tagline">{e(site['brand']['tagline'])}</span>. <span data-cms="home.heroLedeSuffix">{e(h['heroLedeSuffix'])}</span></p>
       </div>
 
       <div class="hero-actions">
-        <a class="btn" href="/proizvodi/">Istraži kolekciju</a>
-        <a class="btn btn--ghost" href="/rasprodaja/">Rasprodaja</a>
-        <span class="hero-scroll"><span class="hero-scroll__line" aria-hidden="true"></span> Skroluj u ploču</span>
+        <a class="btn" href="{e(h['heroPrimaryHref'])}" data-cms="home.heroPrimaryLabel">{e(h['heroPrimaryLabel'])}</a>
+        <a class="btn btn--ghost" href="{e(h['heroSecondaryHref'])}" data-cms="home.heroSecondaryLabel">{e(h['heroSecondaryLabel'])}</a>
+        <span class="hero-scroll"><span class="hero-scroll__line" aria-hidden="true"></span> <span data-cms="home.heroScrollHint">{e(h['heroScrollHint'])}</span></span>
       </div>
     </div>
 
@@ -302,8 +304,8 @@ def home_body(site, categories, counts, products, wordmark=None):
 
 <section class="section paper grooved section--under-hero" id="ponuda">
   <div class="wrap">
-    {eyebrow('Odeljenja / Sections', paper=True)}
-    <h2 class="t-display t-display--lg" style="padding-block:.6rem 1.5rem">Prođi kroz gajbe</h2>
+    {eyebrow(h['departmentsEyebrow'], paper=True, key='home.departmentsEyebrow')}
+    <h2 class="t-display t-display--lg" style="padding-block:.6rem 1.5rem" data-cms="home.departmentsTitle">{e(h['departmentsTitle'])}</h2>
     <div class="crate">{''.join(crate_rows)}</div>
   </div>
 </section>
@@ -312,10 +314,10 @@ def home_body(site, categories, counts, products, wordmark=None):
   <div class="wrap">
     <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;justify-content:space-between">
       <div>
-        {eyebrow('Novo u ponudi')}
-        <h2 class="t-display t-display--lg" style="padding-top:.5rem">Sveže na polici</h2>
+        {eyebrow(h['newInEyebrow'], key='home.newInEyebrow')}
+        <h2 class="t-display t-display--lg" style="padding-top:.5rem" data-cms="home.newInTitle">{e(h['newInTitle'])}</h2>
       </div>
-      <a class="link-cat" href="/proizvodi/?sort=newest">Ceo katalog</a>
+      <a class="link-cat" href="{e(h['newInLinkHref'])}" data-cms="home.newInLinkLabel">{e(h['newInLinkLabel'])}</a>
     </div>
     <div class="grid-products" id="newIn" style="padding-top:2rem"></div>
   </div>
@@ -325,8 +327,8 @@ def home_body(site, categories, counts, products, wordmark=None):
 
 <section class="section">
   <div class="wrap">
-    {eyebrow('Izbor radnje / Selected')}
-    <h2 class="t-display t-display--lg" style="padding-block:.5rem 2rem">Sa gramofona</h2>
+    {eyebrow(h['selectedEyebrow'], key='home.selectedEyebrow')}
+    <h2 class="t-display t-display--lg" style="padding-block:.5rem 2rem" data-cms="home.selectedTitle">{e(h['selectedTitle'])}</h2>
     <div class="selected" id="selected"></div>
   </div>
 </section>
@@ -335,10 +337,10 @@ def home_body(site, categories, counts, products, wordmark=None):
   <div class="wrap">
     <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;justify-content:space-between">
       <div>
-        {eyebrow('Rasprodaja', paper=True)}
-        <h2 class="t-display t-display--lg" style="padding-top:.5rem">Sniženo <span id="saleCount">0</span></h2>
+        {eyebrow(h['saleEyebrow'], paper=True, key='home.saleEyebrow')}
+        <h2 class="t-display t-display--lg" style="padding-top:.5rem"><span data-cms="home.saleTitle">{e(h['saleTitle'])}</span> <span id="saleCount">0</span></h2>
       </div>
-      <a class="link-cat" href="/rasprodaja/">Stranica rasprodaje</a>
+      <a class="link-cat" href="{e(h['saleLinkHref'])}" data-cms="home.saleLinkLabel">{e(h['saleLinkLabel'])}</a>
     </div>
     <div class="grid-products" id="saleBand" style="padding-top:2rem"></div>
   </div>
@@ -346,11 +348,11 @@ def home_body(site, categories, counts, products, wordmark=None):
 
 <section class="section paper" id="radnja">
   <div class="wrap">
-    {eyebrow('Radnja / Kragujevac', paper=True)}
-    <h2 class="t-display t-display--lg" style="padding-block:.5rem 2rem">Dođi i prelistaj</h2>
+    {eyebrow(h['storeEyebrow'], paper=True, key='home.storeEyebrow')}
+    <h2 class="t-display t-display--lg" style="padding-block:.5rem 2rem" data-cms="home.storeTitle">{e(h['storeTitle'])}</h2>
     <div class="band">
       <div>
-        <p class="t-body">Crazy Vinyl Shop je fizička radnja u Kragujevcu. Ploče, diskovi i ostalo stoje na policama — može se pregledati, slušati i pitati. Onlajn katalog je ista roba, samo popisana.</p>
+        <p class="t-body" data-cms="home.storeBody">{e(h['storeBody'])}</p>
         <div class="hours" style="margin-top:1.5rem">{hours_rows}</div>
       </div>
       <div class="panel">
@@ -369,7 +371,7 @@ def home_body(site, categories, counts, products, wordmark=None):
             <span class="contact-list__v"><a href="mailto:{e(store['email'])}">{e(store['email'])}</a></span>
           </div>
         </div>
-        <a class="btn btn--ghost" href="/kontakt/">Kontakt &amp; Tattoo</a>
+        <a class="btn btn--ghost" href="{e(h['storeCtaHref'])}" data-cms="home.storeCtaLabel">{e(h['storeCtaLabel'])}</a>
       </div>
     </div>
   </div>
@@ -379,9 +381,9 @@ def home_body(site, categories, counts, products, wordmark=None):
   <div class="wrap">
     <div class="band">
       <div>
-        {eyebrow('Tattoo studio')}
-        <h2 class="t-display t-display--lg" style="padding-block:.5rem 1rem">{e(tattoo['name'])}</h2>
-        <p class="t-body text-dim">{e(tattoo['note'])}</p>
+        {eyebrow(h['tattooEyebrow'], key='home.tattooEyebrow')}
+        <h2 class="t-display t-display--lg" style="padding-block:.5rem 1rem" data-cms="site.tattoo.name">{e(tattoo['name'])}</h2>
+        <p class="t-body text-dim" data-cms="site.tattoo.note">{e(tattoo['note'])}</p>
       </div>
       <div class="panel panel--ink">
         <span class="panel__corner">Sicario</span>
@@ -580,12 +582,13 @@ def product_body(p, site):
 # cart / checkout / contact / privacy / 404
 # ---------------------------------------------------------------------------
 
-def cart_body():
+def cart_body(pages):
+    c = pages['cart']
     return f'''<section class="page-head">
   <div class="wrap page-head__inner">
     {crumbs([('Početna', '/'), ('Korpa', None)])}
-    <h1 class="page-head__title">Korpa</h1>
-    <p class="page-head__lede">Pregled izabranih naslova. Količine i sadržaj korpe se pamte i posle osvežavanja stranice.</p>
+    <h1 class="page-head__title" data-cms="cart.title">{e(c['title'])}</h1>
+    <p class="page-head__lede" data-cms="cart.lede">{e(c['lede'])}</p>
   </div>
 </section>
 <section class="section section--tight paper">
@@ -598,13 +601,14 @@ def cart_body():
 </section>'''
 
 
-def checkout_body(site):
+def checkout_body(site, pages):
+    k = pages['checkout']
     pm = site['checkout']['paymentMethod']
     return f'''<section class="page-head">
   <div class="wrap page-head__inner">
     {crumbs([('Početna', '/'), ('Korpa', '/korpa/'), ('Kasa', None)])}
-    <h1 class="page-head__title">Kasa</h1>
-    <p class="page-head__lede">Popunite podatke za dostavu. Narudžbenicu potvrđujemo e-mailom ili telefonom.</p>
+    <h1 class="page-head__title" data-cms="checkout.title">{e(k['title'])}</h1>
+    <p class="page-head__lede" data-cms="checkout.lede">{e(k['lede'])}</p>
   </div>
 </section>
 
@@ -613,9 +617,9 @@ def checkout_body(site):
     <div id="checkoutEmpty" hidden>
       <div class="empty">
         <div class="empty__disc">{vinyl(label='CVS', spin=False)}</div>
-        <p class="t-display">Korpa je prazna</p>
-        <p class="text-dim" style="max-width:44ch">Dodajte naslov iz kataloga pa se vratite na kasu.</p>
-        <a class="btn" href="/proizvodi/">Pogledaj katalog</a>
+        <p class="t-display" data-cms="checkout.emptyTitle">{e(k['emptyTitle'])}</p>
+        <p class="text-dim" style="max-width:44ch">{e(k['emptyBody'])}</p>
+        <a class="btn" href="/proizvodi/" data-cms="checkout.emptyCtaLabel">{e(k['emptyCtaLabel'])}</a>
       </div>
     </div>
 
@@ -676,9 +680,9 @@ def checkout_body(site):
         </fieldset>
 
         <div style="padding-top:1.5rem;display:grid;gap:1rem">
-          <p class="notice">Online plaćanje karticom nije aktivno. Narudžbenica se šalje radnji, a plaćanje i isporuka idu preko Post Express-a.</p>
-          <button type="submit" class="btn btn--block" id="checkoutSubmit">Potvrdi narudžbenicu</button>
-          <a class="link-cat" href="/korpa/">Vrati se u korpu</a>
+          <p class="notice">{e(k['paymentNote'])}</p>
+          <button type="submit" class="btn btn--block" id="checkoutSubmit" data-cms="checkout.submitLabel">{e(k['submitLabel'])}</button>
+          <a class="link-cat" href="/korpa/" data-cms="checkout.backLabel">{e(k['backLabel'])}</a>
         </div>
       </form>
 
@@ -688,7 +692,8 @@ def checkout_body(site):
 </section>'''
 
 
-def contact_body(site):
+def contact_body(site, pages):
+    c = pages['contact']
     store = site['store']
     tattoo = site['tattoo']
     hours_rows = ''.join(
@@ -700,8 +705,8 @@ def contact_body(site):
   <div class="page-head__disc" aria-hidden="true">{vinyl(label='KG', speed=0.6)}</div>
   <div class="wrap page-head__inner">
     {crumbs([('Početna', '/'), ('Kontakt & Tattoo', None)])}
-    <h1 class="page-head__title">Kontakt<br>&amp; Tattoo</h1>
-    <p class="page-head__lede">Radnja i tattoo studio dele istu adresu u Kragujevcu. Pozovite, pišite ili dođite.</p>
+    <h1 class="page-head__title"><span data-cms="contact.titleLine1">{e(c['titleLine1'])}</span><br><span data-cms="contact.titleLine2">{e(c['titleLine2'])}</span></h1>
+    <p class="page-head__lede" data-cms="contact.lede">{e(c['lede'])}</p>
   </div>
 </section>
 
@@ -753,34 +758,34 @@ def contact_body(site):
     </div>
 
     <div style="padding-top:clamp(2rem,1rem+3vw,4rem)">
-      {eyebrow('Lokacija', paper=True)}
+      {eyebrow(c['mapEyebrow'], paper=True, key='contact.mapEyebrow')}
       <div class="map-embed" style="margin-top:.9rem">
         <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5058.979196834431!2d20.91077437619572!3d44.011167671087414!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47572182fe1f03eb%3A0xcf478c351c2d3859!2sCrazy%20Vinyl%20Shop!5e1!3m2!1sen!2srs!4v1789569888680!5m2!1sen!2srs"
+          src="{e(c['mapEmbedUrl'])}"
           title="Crazy Vinyl Shop na mapi — {e(store['address'])}"
           loading="lazy"
           allowfullscreen
           referrerpolicy="strict-origin-when-cross-origin"></iframe>
       </div>
       <p class="t-meta" style="padding-top:.8rem">
-        <a class="link-cat" href="https://www.google.com/maps/search/?api=1&amp;query={e(store['address'].replace(' ', '+'))}" target="_blank" rel="noopener">Otvori u Google mapama</a>
+        <a class="link-cat" href="https://www.google.com/maps/search/?api=1&amp;query={e(store['address'].replace(' ', '+'))}" target="_blank" rel="noopener" data-cms="contact.mapLinkLabel">{e(c['mapLinkLabel'])}</a>
       </p>
     </div>
 
     <div style="padding-top:clamp(2rem,1rem+3vw,4rem)">
-      {eyebrow('Poručivanje i dostava', paper=True)}
-      <h2 class="t-display" style="padding-block:.5rem 1rem">Kako ide isporuka</h2>
+      {eyebrow(c['deliveryEyebrow'], paper=True, key='contact.deliveryEyebrow')}
+      <h2 class="t-display" style="padding-block:.5rem 1rem" data-cms="contact.deliveryTitle">{e(c['deliveryTitle'])}</h2>
       <div class="t-body">
-        <p>Narudžbenica se šalje sa stranice Kasa. Isporuka i plaćanje idu preko Post Express-a — pouzećem u Srbiji, export u inostranstvo. Troškovi dostave za Srbiju se obračunavaju po
-        <a href="{e(site['checkout']['priceListUrl'])}" target="_blank" rel="noopener">cenovniku Post Express-a</a>, a za inostranstvo po zonama koje se vide na kasi.</p>
-        <p>Za pitanja o stanju ploče, rezervaciji ili ličnom preuzimanju u radnji — pozovite ili pišite.</p>
+        <p><span data-cms="contact.deliveryBodyBefore">{e(c['deliveryBodyBefore'])}</span>
+        <a href="{e(site['checkout']['priceListUrl'])}" target="_blank" rel="noopener" data-cms="contact.deliveryLinkLabel">{e(c['deliveryLinkLabel'])}</a><span data-cms="contact.deliveryBodyAfter">{e(c['deliveryBodyAfter'])}</span></p>
+        <p data-cms="contact.deliveryNote">{e(c['deliveryNote'])}</p>
       </div>
     </div>
   </div>
 </section>'''
 
 
-def privacy_body(doc):
+def privacy_body(doc, pages):
     toc = []
     sections = []
     for i, sec in enumerate(doc['sections']):
@@ -801,7 +806,7 @@ def privacy_body(doc):
     return f'''<section class="page-head">
   <div class="wrap page-head__inner">
     {crumbs([('Početna', '/'), ('Politika privatnosti', None)])}
-    <h1 class="page-head__title">Politika<br>privatnosti</h1>
+    <h1 class="page-head__title"><span data-cms="privacy.titleLine1">{e(pages['privacy']['titleLine1'])}</span><br><span data-cms="privacy.titleLine2">{e(pages['privacy']['titleLine2'])}</span></h1>
   </div>
 </section>
 <section class="section section--tight paper">
@@ -817,16 +822,17 @@ def privacy_body(doc):
 </section>'''
 
 
-def notfound_body():
+def notfound_body(pages):
+    n = pages['notFound']
     return f'''<section class="nf">
   <div class="nf__inner">
     <div style="width:clamp(120px,20vw,200px)">{vinyl(label='404', speed=1.2)}</div>
     <p class="nf__code">404</p>
     {eyebrow('Strana nije nađena')}
-    <p class="t-body text-dim" style="max-width:44ch">Ova ploča nije u gajbi. Možda je naslov promenio adresu ili je link pogrešan.</p>
+    <p class="t-body text-dim" style="max-width:44ch" data-cms="notFound.body">{e(n['body'])}</p>
     <div style="display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center">
-      <a class="btn" href="/proizvodi/">Ceo katalog</a>
-      <a class="btn btn--ghost" href="/">Početna</a>
+      <a class="btn" href="{e(n['primaryHref'])}" data-cms="notFound.primaryLabel">{e(n['primaryLabel'])}</a>
+      <a class="btn btn--ghost" href="{e(n['secondaryHref'])}" data-cms="notFound.secondaryLabel">{e(n['secondaryLabel'])}</a>
     </div>
   </div>
 </section>'''
@@ -917,6 +923,7 @@ def main():
     site = read('site.json')
     categories = read('categories.json')
     privacy = read('privacy.json')
+    pages = read('pages.json')
 
     counts = Counter(p['category'] for p in products)
     genre_counts = Counter(p['genre'] for p in products if p.get('genre'))
@@ -935,14 +942,28 @@ def main():
         ])
     write('data/index.json', json.dumps({'fields': INDEX_FIELDS, 'rows': rows}, ensure_ascii=False))
 
-    # ---- image manifest: only slugs that really have a file ---------------
+    # ---- image manifest ---------------------------------------------------
+    # {slug: {url, alt}}. Two sources, merged: whatever `content.py pull` wrote
+    # from the CMS, plus any file sitting in images/products/. A file in the
+    # repo wins, so a hand-placed sleeve is never overridden by the database.
+    manifest = {}
+    try:
+        existing = read('images.json')
+        if isinstance(existing, dict):
+            manifest.update(existing)
+    except (FileNotFoundError, ValueError):
+        pass
+
     img_dir = os.path.join(ROOT, 'images', 'products')
     os.makedirs(img_dir, exist_ok=True)
-    have = sorted({
-        os.path.splitext(f)[0] for f in os.listdir(img_dir)
-        if f.lower().endswith(('.jpg', '.jpeg', '.png', '.webp', '.avif'))
-    })
-    write('data/images.json', json.dumps(have, ensure_ascii=False))
+    for f in sorted(os.listdir(img_dir)):
+        stem, ext = os.path.splitext(f)
+        if ext.lower() in ('.jpg', '.jpeg', '.png', '.webp', '.avif'):
+            manifest[stem] = {'url': f'/images/products/{f}',
+                              'alt': manifest.get(stem, {}).get('alt', '')}
+
+    write('data/images.json', json.dumps(manifest, ensure_ascii=False))
+    have = sorted(manifest)
 
     shell = dict(site=site, categories=categories, counts=counts, genres=top_genres)
     written = []
@@ -953,9 +974,10 @@ def main():
 
     # ---- home ------------------------------------------------------------
     emit('index.html',
-         title='Crazy Vinyl Shop — ploče, diskovi i muzička roba iz Kragujevca',
-         description=site['brand']['description'],
-         path='/', page_kind='home', body=home_body(site, categories, counts, products, wordmark),
+         title=pages['home']['seoTitle'],
+         description=pages['home']['seoDescription'] or site['brand']['description'],
+         path='/', page_kind='home',
+         body=home_body(site, categories, counts, products, pages, wordmark),
          jsonld={
              '@context': 'https://schema.org', '@type': 'Store',
              'name': 'Crazy Vinyl Shop', 'url': SITE_URL,
@@ -966,11 +988,14 @@ def main():
          })
 
     # ---- catalogue -------------------------------------------------------
+    cat = pages['catalog']
     emit('proizvodi/index.html',
-         title='Proizvodi — ceo katalog | Crazy Vinyl Shop',
-         description=f'Ceo katalog Crazy Vinyl Shop-a: {len(products)} naslova, filtriranje po žanru, formatu, godini i dostupnosti.',
+         title=cat['seoTitle'],
+         description=f"{cat['seoDescriptionPrefix']} {len(products)} {cat['seoDescriptionSuffix']}",
          path='/proizvodi/', page_kind='shop',
-         body=shop_body(title='Proizvodi', lede=f'Ceo katalog — {len(products)} naslova. Filtriraj po žanru, formatu, godini, zemlji i dostupnosti.',
+         body=shop_body(title=e(cat['title']),
+                        lede=f"{e(cat['ledePrefix'])} {len(products)} {e(cat['ledeSuffix'])}",
+                        title_key='catalog.title',
                         categories=categories, current='all',
                         breadcrumb=[('Početna', '/'), ('Proizvodi', None)]))
 
@@ -981,42 +1006,45 @@ def main():
             empty_hint = f'''<div class="empty" style="margin-top:2rem">
               <div class="empty__disc">{vinyl(label=c['code'], spin=False)}</div>
               <p class="t-display">{e(c['emptyState'])}</p>
-              <p class="text-dim" style="max-width:44ch">Kategorija postoji i čeka robu. U međuvremenu pogledajte ostatak kataloga.</p>
-              <a class="btn" href="/ploce/">Pogledaj ploče</a>
+              <p class="text-dim" style="max-width:44ch">{e(pages['category']['emptyHintBody'])}</p>
+              <a class="btn" href="{e(pages['category']['emptyHintCtaHref'])}">{e(pages['category']['emptyHintCtaLabel'])}</a>
             </div>'''
         emit(f'{c["slug"]}/index.html',
              title=f'{c["label"]} | Crazy Vinyl Shop',
              description=f'{c["blurb"]} {n} naslova u ponudi.' if n else f'{c["blurb"]} {c["emptyState"]}',
              path=c['href'], page_kind='shop',
              body=shop_body(title=e(c['label']), lede=e(c['blurb']),
+                            title_key=f"categories.{c['slug']}.label",
+                            lede_key=f"categories.{c['slug']}.blurb",
                             categories=categories, current=c['slug'],
                             breadcrumb=[('Početna', '/'), ('Proizvodi', '/proizvodi/'), (c['label'], None)],
                             empty_hint=empty_hint))
 
     # ---- sale ------------------------------------------------------------
     on_sale = [p for p in products if p.get('onSale') and p.get('salePrice')]
+    sl = pages['sale']
     sale_empty = '' if on_sale else f'''<div class="empty" style="margin-top:2rem">
       <div class="empty__disc">{vinyl(label='SALE', spin=False)}</div>
-      <p class="t-display">Trenutno nema aktivne rasprodaje</p>
-      <p class="text-dim" style="max-width:46ch">Nijedan naslov nije na sniženju. Kada radnja spusti cene, naslovi se automatski pojavljuju ovde.</p>
+      <p class="t-display" data-cms="sale.emptyTitle">{e(sl['emptyTitle'])}</p>
+      <p class="text-dim" style="max-width:46ch" data-cms="sale.emptyBody">{e(sl['emptyBody'])}</p>
       <div style="display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center">
-        <a class="btn btn--sale" href="/ploce/">Pogledaj ploče</a>
-        <a class="btn btn--ghost" href="/proizvodi/">Ceo katalog</a>
+        <a class="btn btn--sale" href="{e(sl['emptyPrimaryHref'])}" data-cms="sale.emptyPrimaryLabel">{e(sl['emptyPrimaryLabel'])}</a>
+        <a class="btn btn--ghost" href="{e(sl['emptySecondaryHref'])}" data-cms="sale.emptySecondaryLabel">{e(sl['emptySecondaryLabel'])}</a>
       </div>
     </div>'''
 
     sale_head = f'''<section class="page-head sale-head">
   <div class="wrap page-head__inner">
     {crumbs([('Početna', '/'), ('Rasprodaja', None)])}
-    <h1 class="sale-head__title">Sale<br>Rasprodaja</h1>
-    <p class="page-head__lede">Sniženi naslovi iz radnje. Prikazuju se samo cene koje stoje u katalogu.</p>
+    <h1 class="sale-head__title"><span data-cms="sale.titleLine1">{e(sl['titleLine1'])}</span><br><span data-cms="sale.titleLine2">{e(sl['titleLine2'])}</span></h1>
+    <p class="page-head__lede" data-cms="sale.lede">{e(sl['lede'])}</p>
   </div>
 </section>
-<div class="sale-strip">{marquee(['SALE', 'RASPRODAJA', 'LIMITED', 'SNIŽENO', 'LAST COPY'], speed='28s')}</div>'''
+<div class="sale-strip">{marquee(sl['marquee'], speed='28s')}</div>'''
 
     emit('rasprodaja/index.html',
-         title='Rasprodaja | Crazy Vinyl Shop',
-         description='Naslovi na sniženju u Crazy Vinyl Shop-u.',
+         title=sl['seoTitle'],
+         description=sl['seoDescription'],
          path='/rasprodaja/', page_kind='shop', body_class='is-sale',
          body=sale_head + shop_main(categories=categories, current='rasprodaja',
                                     empty_hint=sale_empty))
@@ -1055,17 +1083,18 @@ def main():
              })
 
     # ---- the rest --------------------------------------------------------
-    emit('korpa/index.html', title='Korpa | Crazy Vinyl Shop',
-         description='Pregled korpe pre poručivanja.', path='/korpa/',
-         page_kind='cart', body=cart_body())
+    emit('korpa/index.html', title=pages['cart']['seoTitle'],
+         description=pages['cart']['seoDescription'], path='/korpa/',
+         page_kind='cart', body=cart_body(pages))
 
-    emit('checkout/index.html', title='Kasa | Crazy Vinyl Shop',
-         description='Podaci za dostavu i potvrda narudžbenice. Isporuka preko Post Express-a.',
-         path='/checkout/', page_kind='checkout', body=checkout_body(site))
+    emit('checkout/index.html', title=pages['checkout']['seoTitle'],
+         description=pages['checkout']['seoDescription'],
+         path='/checkout/', page_kind='checkout', body=checkout_body(site, pages))
 
-    emit('kontakt/index.html', title='Kontakt & Tattoo | Crazy Vinyl Shop',
-         description=f'Crazy Vinyl Shop, {site["store"]["address"]}. Telefon {site["store"]["phone"]}. Sicario Tattoo Studio.',
-         path='/kontakt/', page_kind='contact', body=contact_body(site),
+    emit('kontakt/index.html', title=pages['contact']['seoTitle'],
+         description=pages['contact']['seoDescription'] or
+         f'Crazy Vinyl Shop, {site["store"]["address"]}. Telefon {site["store"]["phone"]}. Sicario Tattoo Studio.',
+         path='/kontakt/', page_kind='contact', body=contact_body(site, pages),
          jsonld={
              '@context': 'https://schema.org', '@type': 'Store',
              'name': 'Crazy Vinyl Shop',
@@ -1074,13 +1103,13 @@ def main():
              'telephone': site['store']['phone'], 'email': site['store']['email'],
          })
 
-    emit('politika-privatnosti/index.html', title='Politika privatnosti | Crazy Vinyl Shop',
-         description='Politika privatnosti Crazy Vinyl Shop-a.',
-         path='/politika-privatnosti/', page_kind='doc', body=privacy_body(privacy))
+    emit('politika-privatnosti/index.html', title=pages['privacy']['seoTitle'],
+         description=pages['privacy']['seoDescription'],
+         path='/politika-privatnosti/', page_kind='doc', body=privacy_body(privacy, pages))
 
-    emit('404.html', title='Strana nije nađena | Crazy Vinyl Shop',
-         description='Ova strana ne postoji.', path='/404.html',
-         page_kind='doc', body=notfound_body())
+    emit('404.html', title=pages['notFound']['seoTitle'],
+         description=pages['notFound']['seoDescription'], path='/404.html',
+         page_kind='doc', body=notfound_body(pages))
 
     # ---- sitemap + robots ------------------------------------------------
     urls = ['/', '/proizvodi/', '/rasprodaja/', '/kontakt/', '/politika-privatnosti/',
@@ -1092,7 +1121,11 @@ def main():
         sm.append(f'  <url><loc>{SITE_URL}{u}</loc></url>')
     sm.append('</urlset>')
     write('sitemap.xml', '\n'.join(sm) + '\n')
-    write('robots.txt', f'User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n')
+    # /admin is the CMS, not content. Keep it out of the index — everything
+    # behind it needs a login anyway, so a crawler has nothing to find.
+    write('robots.txt',
+          f'User-agent: *\nAllow: /\nDisallow: /admin/\n'
+          f'Sitemap: {SITE_URL}/sitemap.xml\n')
     # GitHub Pages would otherwise run the output through Jekyll
     write('.nojekyll', '')
 

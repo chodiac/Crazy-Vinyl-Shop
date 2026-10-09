@@ -19,9 +19,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script>(function(){var d=document.documentElement;d.classList.remove('no-js');var t='light';try{var v=localStorage.getItem('cvs.theme');if(v==='light'||v==='dark')t=v;}catch(e){}d.setAttribute('data-theme',t);var m=null;try{m=localStorage.getItem('cvs.motion');}catch(e){}if(/[?&]motion=(1|force)/.test(location.search))m='full';else if(/[?&]motion=0/.test(location.search))m='reduced';if(m==='reduced')d.classList.add('rm');})();</script>
-<link rel="stylesheet" href="../assets/css/base.css?v=99922431">
-<link rel="stylesheet" href="../assets/css/components.css?v=99922431">
-<link rel="stylesheet" href="../assets/css/pages.css?v=99922431">
+<link rel="stylesheet" href="../assets/css/base.css?v=6cf3089a">
+<link rel="stylesheet" href="../assets/css/components.css?v=6cf3089a">
+<link rel="stylesheet" href="../assets/css/pages.css?v=6cf3089a">
 
 </head>
 <body data-page="shop" class="is-sale">
@@ -130,8 +130,8 @@
 <section class="page-head sale-head">
   <div class="wrap page-head__inner">
     <nav aria-label="Putanja"><ol class="crumbs"><li><a href="../">Početna</a></li><li><span>Rasprodaja</span></li></ol></nav>
-    <h1 class="sale-head__title">Sale<br>Rasprodaja</h1>
-    <p class="page-head__lede">Sniženi naslovi iz radnje. Prikazuju se samo cene koje stoje u katalogu.</p>
+    <h1 class="sale-head__title"><span data-cms="sale.titleLine1">Sale</span><br><span data-cms="sale.titleLine2">Rasprodaja</span></h1>
+    <p class="page-head__lede" data-cms="sale.lede">Sniženi naslovi iz radnje. Prikazuju se samo cene koje stoje u katalogu.</p>
   </div>
 </section>
 <div class="sale-strip"><div class="marquee " style="--speed:28s" aria-hidden="true">
@@ -169,11 +169,11 @@
         </div>
         <span class="vinyl__hole"></span>
       </div></div>
-      <p class="t-display">Trenutno nema aktivne rasprodaje</p>
-      <p class="text-dim" style="max-width:46ch">Nijedan naslov nije na sniženju. Kada radnja spusti cene, naslovi se automatski pojavljuju ovde.</p>
+      <p class="t-display" data-cms="sale.emptyTitle">Trenutno nema aktivne rasprodaje</p>
+      <p class="text-dim" style="max-width:46ch" data-cms="sale.emptyBody">Nijedan naslov nije na sniženju. Kada radnja spusti cene, naslovi se automatski pojavljuju ovde.</p>
       <div style="display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center">
-        <a class="btn btn--sale" href="../ploce/">Pogledaj ploče</a>
-        <a class="btn btn--ghost" href="../proizvodi/">Ceo katalog</a>
+        <a class="btn btn--sale" href="../ploce/" data-cms="sale.emptyPrimaryLabel">Pogledaj ploče</a>
+        <a class="btn btn--ghost" href="../proizvodi/" data-cms="sale.emptySecondaryLabel">Ceo katalog</a>
       </div>
     </div>
       </div>
@@ -252,6 +252,6 @@
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script type="module" src="../assets/js/main.js?v=99922431"></script>
+<script type="module" src="../assets/js/main.js?v=6cf3089a"></script>
 </body>
 </html>

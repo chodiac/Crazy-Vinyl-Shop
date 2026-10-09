@@ -1,0 +1,113 @@
+{
+  "home": {
+    "seoTitle": "Crazy Vinyl Shop — ploče, diskovi i muzička roba iz Kragujevca",
+    "seoDescription": "",
+    "heroLedeSuffix": "Radnja u Kragujevcu i onlajn katalog.",
+    "heroPrimaryLabel": "Istraži kolekciju",
+    "heroPrimaryHref": "/proizvodi/",
+    "heroSecondaryLabel": "Rasprodaja",
+    "heroSecondaryHref": "/rasprodaja/",
+    "heroScrollHint": "Skroluj u ploču",
+    "departmentsEyebrow": "Odeljenja / Sections",
+    "departmentsTitle": "Prođi kroz gajbe",
+    "newInEyebrow": "Novo u ponudi",
+    "newInTitle": "Sveže na polici",
+    "newInLinkLabel": "Ceo katalog",
+    "newInLinkHref": "/proizvodi/?sort=newest",
+    "selectedEyebrow": "Izbor radnje / Selected",
+    "selectedTitle": "Sa gramofona",
+    "saleEyebrow": "Rasprodaja",
+    "saleTitle": "Sniženo",
+    "saleLinkLabel": "Stranica rasprodaje",
+    "saleLinkHref": "/rasprodaja/",
+    "storeEyebrow": "Radnja / Kragujevac",
+    "storeTitle": "Dođi i prelistaj",
+    "storeBody": "Crazy Vinyl Shop je fizička radnja u Kragujevcu. Ploče, diskovi i ostalo stoje na policama — može se pregledati, slušati i pitati. Onlajn katalog je ista roba, samo popisana.",
+    "storeCtaLabel": "Kontakt & Tattoo",
+    "storeCtaHref": "/kontakt/",
+    "tattooEyebrow": "Tattoo studio"
+  },
+  "catalog": {
+    "seoTitle": "Proizvodi — ceo katalog | Crazy Vinyl Shop",
+    "title": "Proizvodi",
+    "ledePrefix": "Ceo katalog —",
+    "ledeSuffix": "naslova. Filtriraj po žanru, formatu, godini, zemlji i dostupnosti.",
+    "seoDescriptionPrefix": "Ceo katalog Crazy Vinyl Shop-a:",
+    "seoDescriptionSuffix": "naslova, filtriranje po žanru, formatu, godini i dostupnosti."
+  },
+  "category": {
+    "emptyHintBody": "Kategorija postoji i čeka robu. U međuvremenu pogledajte ostatak kataloga.",
+    "emptyHintCtaLabel": "Pogledaj ploče",
+    "emptyHintCtaHref": "/ploce/"
+  },
+  "sale": {
+    "seoTitle": "Rasprodaja | Crazy Vinyl Shop",
+    "seoDescription": "Naslovi na sniženju u Crazy Vinyl Shop-u.",
+    "titleLine1": "Sale",
+    "titleLine2": "Rasprodaja",
+    "lede": "Sniženi naslovi iz radnje. Prikazuju se samo cene koje stoje u katalogu.",
+    "marquee": [
+      "SALE",
+      "RASPRODAJA",
+      "LIMITED",
+      "SNIŽENO",
+      "LAST COPY"
+    ],
+    "emptyTitle": "Trenutno nema aktivne rasprodaje",
+    "emptyBody": "Nijedan naslov nije na sniženju. Kada radnja spusti cene, naslovi se automatski pojavljuju ovde.",
+    "emptyPrimaryLabel": "Pogledaj ploče",
+    "emptyPrimaryHref": "/ploce/",
+    "emptySecondaryLabel": "Ceo katalog",
+    "emptySecondaryHref": "/proizvodi/"
+  },
+  "contact": {
+    "seoTitle": "Kontakt & Tattoo | Crazy Vinyl Shop",
+    "seoDescription": "",
+    "titleLine1": "Kontakt",
+    "titleLine2": "& Tattoo",
+    "lede": "Radnja i tattoo studio dele istu adresu u Kragujevcu. Pozovite, pišite ili dođite.",
+    "mapEyebrow": "Lokacija",
+    "mapEmbedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5058.979196834431!2d20.91077437619572!3d44.011167671087414!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47572182fe1f03eb%3A0xcf478c351c2d3859!2sCrazy%20Vinyl%20Shop!5e1!3m2!1sen!2srs!4v1789569888680!5m2!1sen!2srs",
+    "mapLinkLabel": "Otvori u Google mapama",
+    "deliveryEyebrow": "Poručivanje i dostava",
+    "deliveryTitle": "Kako ide isporuka",
+    "deliveryBodyBefore": "Narudžbenica se šalje sa stranice Kasa. Isporuka i plaćanje idu preko Post Express-a — pouzećem u Srbiji, export u inostranstvo. Troškovi dostave za Srbiju se obračunavaju po",
+    "deliveryLinkLabel": "cenovniku Post Express-a",
+    "deliveryBodyAfter": ", a za inostranstvo po zonama koje se vide na kasi.",
+    "deliveryNote": "Za pitanja o stanju ploče, rezervaciji ili ličnom preuzimanju u radnji — pozovite ili pišite."
+  },
+  "cart": {
+    "seoTitle": "Korpa | Crazy Vinyl Shop",
+    "seoDescription": "Pregled korpe pre poručivanja.",
+    "title": "Korpa",
+    "lede": "Pregled izabranih naslova. Količine i sadržaj korpe se pamte i posle osvežavanja stranice."
+  },
+  "checkout": {
+    "seoTitle": "Kasa | Crazy Vinyl Shop",
+    "seoDescription": "Podaci za dostavu i potvrda narudžbenice. Isporuka preko Post Express-a.",
+    "title": "Kasa",
+    "lede": "Popunite podatke za dostavu. Narudžbenicu potvrđujemo e-mailom ili telefonom.",
+    "emptyTitle": "Korpa je prazna",
+    "emptyBody": "Dodajte naslov iz kataloga pa se vratite na kasu.",
+    "emptyCtaLabel": "Pogledaj katalog",
+    "emptyCtaHref": "/proizvodi/",
+    "paymentNote": "Online plaćanje karticom nije aktivno. Narudžbenica se šalje radnji, a plaćanje i isporuka idu preko Post Express-a.",
+    "submitLabel": "Potvrdi narudžbenicu",
+    "backLabel": "Vrati se u korpu"
+  },
+  "privacy": {
+    "seoTitle": "Politika privatnosti | Crazy Vinyl Shop",
+    "seoDescription": "Politika privatnosti Crazy Vinyl Shop-a.",
+    "titleLine1": "Politika",
+    "titleLine2": "privatnosti"
+  },
+  "notFound": {
+    "seoTitle": "Strana nije nađena | Crazy Vinyl Shop",
+    "seoDescription": "Ova strana ne postoji.",
+    "body": "Ova ploča nije u gajbi. Možda je naslov promenio adresu ili je link pogrešan.",
+    "primaryLabel": "Ceo katalog",
+    "primaryHref": "/proizvodi/",
+    "secondaryLabel": "Početna",
+    "secondaryHref": "/"
+  }
+}

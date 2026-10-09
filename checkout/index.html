@@ -19,9 +19,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script>(function(){var d=document.documentElement;d.classList.remove('no-js');var t='light';try{var v=localStorage.getItem('cvs.theme');if(v==='light'||v==='dark')t=v;}catch(e){}d.setAttribute('data-theme',t);var m=null;try{m=localStorage.getItem('cvs.motion');}catch(e){}if(/[?&]motion=(1|force)/.test(location.search))m='full';else if(/[?&]motion=0/.test(location.search))m='reduced';if(m==='reduced')d.classList.add('rm');})();</script>
-<link rel="stylesheet" href="../assets/css/base.css?v=99922431">
-<link rel="stylesheet" href="../assets/css/components.css?v=99922431">
-<link rel="stylesheet" href="../assets/css/pages.css?v=99922431">
+<link rel="stylesheet" href="../assets/css/base.css?v=6cf3089a">
+<link rel="stylesheet" href="../assets/css/components.css?v=6cf3089a">
+<link rel="stylesheet" href="../assets/css/pages.css?v=6cf3089a">
 
 </head>
 <body data-page="checkout" class="">
@@ -130,8 +130,8 @@
 <section class="page-head">
   <div class="wrap page-head__inner">
     <nav aria-label="Putanja"><ol class="crumbs"><li><a href="../">Početna</a></li><li><a href="../korpa/">Korpa</a></li><li><span>Kasa</span></li></ol></nav>
-    <h1 class="page-head__title">Kasa</h1>
-    <p class="page-head__lede">Popunite podatke za dostavu. Narudžbenicu potvrđujemo e-mailom ili telefonom.</p>
+    <h1 class="page-head__title" data-cms="checkout.title">Kasa</h1>
+    <p class="page-head__lede" data-cms="checkout.lede">Popunite podatke za dostavu. Narudžbenicu potvrđujemo e-mailom ili telefonom.</p>
   </div>
 </section>
 
@@ -145,9 +145,9 @@
         </div>
         <span class="vinyl__hole"></span>
       </div></div>
-        <p class="t-display">Korpa je prazna</p>
+        <p class="t-display" data-cms="checkout.emptyTitle">Korpa je prazna</p>
         <p class="text-dim" style="max-width:44ch">Dodajte naslov iz kataloga pa se vratite na kasu.</p>
-        <a class="btn" href="../proizvodi/">Pogledaj katalog</a>
+        <a class="btn" href="../proizvodi/" data-cms="checkout.emptyCtaLabel">Pogledaj katalog</a>
       </div>
     </div>
 
@@ -209,8 +209,8 @@
 
         <div style="padding-top:1.5rem;display:grid;gap:1rem">
           <p class="notice">Online plaćanje karticom nije aktivno. Narudžbenica se šalje radnji, a plaćanje i isporuka idu preko Post Express-a.</p>
-          <button type="submit" class="btn btn--block" id="checkoutSubmit">Potvrdi narudžbenicu</button>
-          <a class="link-cat" href="../korpa/">Vrati se u korpu</a>
+          <button type="submit" class="btn btn--block" id="checkoutSubmit" data-cms="checkout.submitLabel">Potvrdi narudžbenicu</button>
+          <a class="link-cat" href="../korpa/" data-cms="checkout.backLabel">Vrati se u korpu</a>
         </div>
       </form>
 
@@ -277,6 +277,6 @@
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script type="module" src="../assets/js/main.js?v=99922431"></script>
+<script type="module" src="../assets/js/main.js?v=6cf3089a"></script>
 </body>
 </html>

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="sr-Latn-RS">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — Crazy Vinyl Shop</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./admin.css">
+</head>
+<body>
+
+<noscript>
+  <p style="padding:2rem">Admin panel zahteva JavaScript.</p>
+</noscript>
+
+<!-- ─────────────────────────────── login ─────────────────────────────── -->
+<main id="login" class="gate" hidden>
+  <form class="gate__card" id="loginForm" novalidate>
+    <p class="gate__brand">Crazy Vinyl Shop</p>
+    <h1 class="gate__title">Admin panel</h1>
+
+    <label class="field">
+      <span class="field__label">E-mail</span>
+      <input class="input" type="email" name="email" autocomplete="username" required>
+    </label>
+
+    <label class="field" id="pwField">
+      <span class="field__label">Lozinka</span>
+      <input class="input" type="password" name="password" autocomplete="current-password" required>
+    </label>
+
+    <button class="btn btn--primary" type="submit" id="loginBtn">Prijava</button>
+
+    <p class="gate__msg" id="loginMsg" role="status" aria-live="polite"></p>
+
+    <button class="linkish" type="button" id="forgotBtn">Zaboravljena lozinka?</button>
+  </form>
+</main>
+
+<!-- ───────────────────────────── new password ────────────────────────── -->
+<main id="recover" class="gate" hidden>
+  <form class="gate__card" id="recoverForm" novalidate>
+    <p class="gate__brand">Crazy Vinyl Shop</p>
+    <h1 class="gate__title">Nova lozinka</h1>
+    <label class="field">
+      <span class="field__label">Nova lozinka</span>
+      <input class="input" type="password" name="password" autocomplete="new-password"
+             minlength="8" required>
+      <span class="field__help">Najmanje 8 znakova.</span>
+    </label>
+    <button class="btn btn--primary" type="submit">Sačuvaj lozinku</button>
+    <p class="gate__msg" id="recoverMsg" role="status" aria-live="polite"></p>
+  </form>
+</main>
+
+<!-- ───────────────────────────── no access ───────────────────────────── -->
+<main id="denied" class="gate" hidden>
+  <div class="gate__card">
+    <h1 class="gate__title">Nemate pristup</h1>
+    <p class="gate__msg is-err">Ovaj nalog nije administrator. Obratite se vlasniku sajta.</p>
+    <button class="btn" type="button" data-logout>Odjava</button>
+  </div>
+</main>
+
+<!-- ─────────────────────────────── panel ─────────────────────────────── -->
+<div id="shell" class="shell" hidden>
+
+  <header class="topbar">
+    <button class="icon-btn" id="navToggle" aria-label="Meni" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <p class="topbar__brand">Crazy Vinyl Shop <span>admin</span></p>
+
+    <div class="topbar__actions">
+      <span class="dirty-dot" id="dirtyDot" hidden title="Nesačuvane izmene"></span>
+      <button class="btn btn--sm" type="button" id="saveBtn" disabled>Sačuvaj nacrt</button>
+      <button class="btn btn--sm" type="button" id="previewBtn">Pregled</button>
+      <button class="btn btn--sm btn--primary" type="button" id="publishBtn">Objavi</button>
+      <button class="icon-btn" type="button" data-logout aria-label="Odjava">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <nav class="sidenav" id="sidenav" aria-label="Sekcije"></nav>
+  <div class="scrim" id="navScrim" hidden></div>
+
+  <main class="main" id="view" tabindex="-1"></main>
+</div>
+
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal__scrim" data-modal-close></div>
+  <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h2 class="modal__title" id="modalTitle"></h2>
+    <div class="modal__body" id="modalBody"></div>
+    <div class="modal__foot" id="modalFoot"></div>
+  </div>
+</div>
+
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>
