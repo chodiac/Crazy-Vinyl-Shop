@@ -40,6 +40,13 @@ admin panel (browser)  ──write──▶  Supabase: draft
 2. **SQL Editor → New query** → paste `supabase/migrations/0001_cms.sql` → Run.
 3. Same again with `supabase/migrations/0002_seed_content.sql`. This loads the
    website's current text, so nothing changes on the site.
+
+Both files are safe to run again — every statement is `create … if not exists`,
+`create or replace`, `drop … if exists` or `on conflict do update`. If you ran
+an earlier copy of `0001_cms.sql`, re-run it: the first version left the table
+privileges to the project defaults, and on a project that does not apply them
+every request fails with `42501 permission denied for table` before any policy
+is reached. The current file grants them explicitly, to `authenticated` only.
 4. **Project Settings → API** — copy the *Project URL* and the *anon public*
    key into `admin/config.js`.
 

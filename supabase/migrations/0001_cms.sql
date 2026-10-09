@@ -255,10 +255,37 @@ $$;
 grant execute on function public.restore_version(bigint) to authenticated;
 
 -- =========================================================================
+-- Table privileges
+--
+-- RLS only gets a say once the role already holds the table privilege, so
+-- these grants have to be explicit: a project whose default privileges do not
+-- cover SQL-editor-created tables answers every request with
+-- "42501 permission denied for table", before a single policy is evaluated.
+--
+-- `authenticated` only. `anon` is granted nothing anywhere in this file — the
+-- public website is static HTML and never queries this database, so the
+-- anonymous role has no reason to reach a single table.
+-- =========================================================================
+
+grant usage on schema public to authenticated;
+
+grant select                         on public.profiles         to authenticated;
+grant select, insert, update, delete on public.content_docs     to authenticated;
+grant select                         on public.content_versions to authenticated;
+grant select, insert, update, delete on public.media            to authenticated;
+grant select, insert, update, delete on public.product_images   to authenticated;
+grant select                         on public.publish_runs     to authenticated;
+
+-- Rows in content_versions and publish_runs are written only from inside
+-- publish_docs(), which is SECURITY DEFINER, so no insert privilege — and no
+-- sequence privilege — is handed to the caller.
+
+-- =========================================================================
 -- Row level security
 --
--- Default deny. Nothing below grants anon a single row: the public website is
--- static HTML and never queries this database.
+-- Default deny. With the grants above in place, these policies are what
+-- actually decides: an authenticated non-admin reaches the tables and is then
+-- shown nothing.
 -- =========================================================================
 
 alter table public.profiles         enable row level security;
