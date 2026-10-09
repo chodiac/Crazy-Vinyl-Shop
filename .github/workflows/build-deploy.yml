@@ -39,12 +39,16 @@ jobs:
       # Published content replaces data/*.json. If the secrets are missing the
       # step is skipped and the build falls back to the files in the repo, so a
       # code-only push still deploys a correct site.
-      - name: Pull published content from Supabase
-        if: ${{ secrets.SUPABASE_URL != '' }}
+          - name: Pull published content from Supabase
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: python tools/content.py pull
+        run: |
+          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            python tools/content.py pull
+          else
+            echo "Supabase secrets are missing. Using repository data."
+          fi
 
       - name: Build
         run: python tools/build.py
