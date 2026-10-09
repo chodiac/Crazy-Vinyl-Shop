@@ -90,6 +90,31 @@ export async function preloadEdits() {
   try { await loadEdits(); } catch { /* the section reports it properly */ }
 }
 
+export const pendingSlugs = () => [...edits.keys()].filter(pending);
+
+/**
+ * Publishes the edited products and then checks that the database agrees.
+ *
+ * publish_products() returns a run id whether it updated one row or none, so
+ * the only honest way to know is to read the rows back. Whatever is still
+ * pending afterwards did not publish, and the caller must say so instead of
+ * reporting a success.
+ *
+ * Nothing here touches `draft`: a product that fails to publish keeps its
+ * edit, ready to be tried again.
+ */
+export async function publishPending(note) {
+  const requested = pendingSlugs();
+  if (!requested.length) return { requested: [], published: [], stillPending: [], runId: null };
+
+  const runId = await api.publishProducts(requested, note);
+  await loadEdits();
+
+  const stillPending = requested.filter((slug) => pending(slug));
+  const published = requested.filter((slug) => !stillPending.includes(slug));
+  return { requested, published, stillPending, runId };
+}
+
 export function pendingCount() {
   let n = 0;
   for (const slug of edits.keys()) if (pending(slug)) n += 1;

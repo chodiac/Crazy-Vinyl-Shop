@@ -66,32 +66,28 @@ export async function saveDrafts(onlyKeys) {
  * Publishing always saves first. Anything else would let the two drift: the
  * button says "publish what I see", and what the user sees is the working copy.
  */
-export async function publishAll(note, { products = 0 } = {}) {
+/**
+ * Publishes the content documents only, and reports what the database
+ * actually accepted rather than what it was asked to do.
+ *
+ * It does not dispatch the rebuild: products publish through their own module
+ * and both have to land before the site is regenerated, so the caller fires
+ * that once, at the end.
+ */
+export async function publishAll(note) {
   await saveDrafts();
-  const targets = unpublishedKeys();
-  if (!targets.length && !products) return { targets: [], products: 0, runId: null };
+  const requested = unpublishedKeys();
+  if (!requested.length) return { requested: [], published: [], runId: null };
 
-  // Product edits live in their own table, but they go live on the same click:
-  // one publish, one rebuild, one moment where the site changes.
-  let runId = null;
-  if (products) runId = await api.publishProducts(null, note);
-  if (targets.length) runId = await api.publish(targets, note);
-  for (const key of targets) {
-    state.docs[key].published = clone(state.working[key]);
-    state.docs[key].published_at = new Date().toISOString();
-  }
-  emit();
+  const runId = await api.publish(requested, note);
 
-  // The content is already live in the database; the rebuild is what carries
-  // it to the static site. If that call fails the publish still stands, so it
-  // is reported separately rather than thrown.
-  let rebuild = 'ok';
-  try {
-    await api.requestRebuild(runId);
-  } catch (err) {
-    rebuild = err.message;
-  }
-  return { targets, products, runId, rebuild };
+  // Re-read instead of assuming. A publish that matched no rows returns
+  // perfectly happily, and claiming success on the strength of having asked
+  // is how a failure ends up looking like a success.
+  await load();
+  const published = requested.filter((k) => !unpublishedKeys().includes(k));
+
+  return { requested, published, runId };
 }
 
 /** Throw away local edits for one document and go back to the stored draft. */

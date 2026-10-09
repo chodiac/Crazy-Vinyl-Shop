@@ -108,14 +108,16 @@ def api(path, method='GET', body=None, prefer=None, optional=False):
             return json.loads(raw) if raw.strip() else None
     except urllib.error.HTTPError as err:
         detail = err.read().decode('utf-8', 'replace')[:400]
-        if optional:
-            print(f'[content] preskočeno ({err.code}): {path}')
+        # `optional` means "this table may not exist yet", and nothing more.
+        # A 401 or 403 is a misconfiguration, and swallowing it would deploy a
+        # site quietly missing everything that table holds — the failure mode
+        # that is hardest to notice, because the build goes green.
+        missing = err.code == 404 or 'PGRST205' in detail
+        if optional and missing:
+            print(f'[content] tabela ne postoji, preskočeno: {path}')
             return None
         sys.exit(f'[content] Supabase {err.code} na {path}\n{detail}')
     except urllib.error.URLError as err:
-        if optional:
-            print(f'[content] preskočeno (nedostupno): {path}')
-            return None
         sys.exit(f'[content] Supabase nedostupan: {err.reason}')
 
 

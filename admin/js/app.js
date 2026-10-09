@@ -8,7 +8,9 @@ import { GROUPS, groupById, DOC_LABELS } from './schema.js';
 import { renderSection } from './fields.js';
 import { renderMediaView, loadMedia } from './media.js';
 import { renderProductsView } from './products.js';
-import { renderCatalogView, pendingCount, preloadEdits } from './catalog.js';
+import {
+  renderCatalogView, pendingCount, preloadEdits, publishPending,
+} from './catalog.js';
 import { openPreview } from './preview.js';
 import { $, $$, el, clear, toast, confirmDialog, dateTime } from './ui.js';
 
@@ -263,18 +265,56 @@ $('#publishBtn').addEventListener('click', async () => {
   const btn = $('#publishBtn');
   btn.disabled = true;
   btn.textContent = 'Objavljujem…';
+
+  // Content and products publish separately but ship together, so the rebuild
+  // is dispatched once, after both — and only if something actually landed.
+  let docs = { requested: [], published: [], runId: null };
+  let items = { requested: [], published: [], stillPending: [], runId: null };
   try {
-    const { targets, products, rebuild } = await store.publishAll(null, { products: prods });
-    if (rebuild === 'ok') {
-      toast(`Objavljeno: ${targets.length + products}. Sajt se osvežava za minut-dva.`, 'ok');
-    } else {
-      toast('Sadržaj je objavljen, ali izgradnja sajta nije pokrenuta automatski. '
-        + 'Pokrenite „Build and deploy” na GitHub-u.', 'err');
-      console.warn('[cms] rebuild dispatch:', rebuild);
-    }
+    docs = await store.publishAll();
+    items = await publishPending();
   } catch (err) {
     toast(`Objavljivanje nije uspelo: ${err.message}`, 'err');
-  } finally { syncChrome(); }
+    syncChrome();
+    if (route === 'proizvodi') navigate('proizvodi');
+    return;
+  }
+
+  const landed = docs.published.length + items.published.length;
+  const failed = (docs.requested.length - docs.published.length) + items.stillPending.length;
+
+  // The database accepted nothing. Saying "objavljeno" here is exactly the
+  // lie this reports instead.
+  if (!landed) {
+    toast('Ništa nije objavljeno — baza nije prihvatila izmene. '
+      + 'Nacrti su sačuvani. Proverite dozvole i pokušajte ponovo.', 'err');
+    console.error('[cms] publish landed nothing', { docs, items });
+    syncChrome();
+    if (route === 'proizvodi') navigate('proizvodi');
+    return;
+  }
+
+  let rebuild = 'ok';
+  try {
+    await api.requestRebuild(items.runId ?? docs.runId);
+  } catch (err) {
+    rebuild = err.message;
+  }
+
+  if (failed) {
+    toast(`Objavljeno ${landed}, ali ${failed} nije prošlo. `
+      + 'Te izmene su i dalje nacrt.', 'err');
+    console.error('[cms] partially published', { docs, items });
+  } else if (rebuild === 'ok') {
+    toast(`Objavljeno: ${landed}. Sajt se osvežava za minut-dva.`, 'ok');
+  } else {
+    toast('Objavljeno, ali izgradnja sajta nije pokrenuta automatski. '
+      + 'Pokrenite „Build and deploy" na GitHub-u.', 'err');
+    console.warn('[cms] rebuild dispatch:', rebuild);
+  }
+
+  syncChrome();
+  if (route === 'proizvodi') navigate('proizvodi');
 });
 
 /* ---------------------------------------------------------- versions view */
