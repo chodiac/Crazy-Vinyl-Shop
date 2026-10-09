@@ -123,6 +123,23 @@ Until this is done, publishing still works and the content is stored — the
 admin says so and you run **Actions → Build and deploy → Run workflow** by
 hand.
 
+### Allowed origins
+
+A browser will only call the function from an origin the function names back.
+`ALLOWED_ORIGINS` at the top of `index.ts` holds the list:
+
+```
+https://chodiac.github.io      GitHub Pages
+https://crazyvinylshop.rs      the custom domain
+https://www.crazyvinylshop.rs
+http://localhost:5180          local preview
+http://127.0.0.1:5180
+```
+
+Add an origin there and redeploy if the admin ever moves. A missing one shows
+up in the browser console as a CORS error on `/functions/v1/publish`, and the
+admin reports that the content was published but the rebuild did not start.
+
 ## 4. Local use
 
 ```bash
