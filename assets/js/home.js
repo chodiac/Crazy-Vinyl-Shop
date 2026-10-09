@@ -52,9 +52,17 @@ export async function initHome() {
   if (selected) {
     const pool = newest(products.filter((p) => p.available));
     const picks = [];
-    // prefer titles that actually carry liner notes / a tracklist
+    // A title marked as featured in the admin goes first: that is the whole
+    // point of the flag. Everything below is the fallback for when nothing
+    // has been marked, which is how this section behaved before.
     for (const p of pool) {
       if (picks.length >= SELECTED_COUNT) break;
+      if (p.featured) picks.push(p);
+    }
+    // then prefer titles that actually carry liner notes / a tracklist
+    for (const p of pool) {
+      if (picks.length >= SELECTED_COUNT) break;
+      if (picks.includes(p)) continue;
       if (p.hasNotes || p.trackCount > 0) picks.push(p);
     }
     for (const p of pool) {

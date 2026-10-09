@@ -8,6 +8,7 @@ import { GROUPS, groupById, DOC_LABELS } from './schema.js';
 import { renderSection } from './fields.js';
 import { renderMediaView, loadMedia } from './media.js';
 import { renderProductsView } from './products.js';
+import { renderCatalogView, pendingCount, preloadEdits } from './catalog.js';
 import { openPreview } from './preview.js';
 import { $, $$, el, clear, toast, confirmDialog, dateTime } from './ui.js';
 
@@ -112,6 +113,7 @@ async function startPanel() {
   try {
     await store.load();
     await loadMedia();
+    await preloadEdits();
   } catch (err) {
     toast(`Sadržaj nije učitan: ${err.message}`, 'err');
     return;
@@ -140,6 +142,9 @@ function buildNav() {
     }
   }
 
+  nav.append(el('p', { class: 'sidenav__group', text: 'Katalog' }));
+  nav.append(el('button', { class: 'sidenav__link', type: 'button', dataset: { route: 'proizvodi' }, onclick: () => navigate('proizvodi') }, 'Proizvodi'));
+
   nav.append(el('p', { class: 'sidenav__group', text: 'Slike' }));
   nav.append(el('button', { class: 'sidenav__link', type: 'button', dataset: { route: 'slike' }, onclick: () => navigate('slike') }, 'Biblioteka slika'));
   nav.append(el('button', { class: 'sidenav__link', type: 'button', dataset: { route: 'omoti' }, onclick: () => navigate('omoti') }, 'Omoti proizvoda'));
@@ -155,13 +160,17 @@ function syncChrome() {
   $('#dirtyDot').hidden = !dirty;
 
   const ahead = new Set(store.unpublishedKeys());
-  $('#publishBtn').disabled = ahead.size === 0;
-  $('#publishBtn').textContent = ahead.size ? `Objavi (${ahead.size})` : 'Objavljeno';
+  const prods = pendingCount();
+  const total = ahead.size + prods;
+  $('#publishBtn').disabled = total === 0;
+  $('#publishBtn').textContent = total ? `Objavi (${total})` : 'Objavljeno';
 
   $$('.sidenav__link').forEach((link) => {
     link.setAttribute('aria-current', String(link.dataset.route === route));
     const dot = link.querySelector('.sidenav__dot');
-    const flag = link.dataset.doc && ahead.has(link.dataset.doc);
+    const flag = link.dataset.route === 'proizvodi'
+      ? prods > 0
+      : link.dataset.doc && ahead.has(link.dataset.doc);
     if (flag && !dot) link.append(el('span', { class: 'sidenav__dot', title: 'Ima neobjavljenih izmena' }));
     if (!flag && dot) dot.remove();
   });
@@ -175,6 +184,7 @@ function navigate(id) {
   view.scrollTo?.(0, 0);
   window.scrollTo(0, 0);
 
+  if (id === 'proizvodi') return void renderCatalogView(view).then(syncChrome);
   if (id === 'slike') return void renderMediaView(view);
   if (id === 'omoti') return void renderProductsView(view);
   if (id === 'verzije') return void renderVersionsView(view);
@@ -233,8 +243,10 @@ $('#previewBtn').addEventListener('click', () => {
 
 $('#publishBtn').addEventListener('click', async () => {
   const ahead = store.unpublishedKeys();
+  const prods = pendingCount();
   const list = el('ul', { style: 'margin:.6rem 0 0;padding-left:1.1rem;list-style:disc' },
-    ...ahead.map((k) => el('li', { text: DOC_LABELS[k] || k })));
+    ...ahead.map((k) => el('li', { text: DOC_LABELS[k] || k })),
+    prods ? el('li', { text: `Proizvodi (${prods})` }) : null);
 
   const ok = await confirmDialog({
     title: 'Objavljivanje',
@@ -252,9 +264,9 @@ $('#publishBtn').addEventListener('click', async () => {
   btn.disabled = true;
   btn.textContent = 'Objavljujem…';
   try {
-    const { targets, rebuild } = await store.publishAll();
+    const { targets, products, rebuild } = await store.publishAll(null, { products: prods });
     if (rebuild === 'ok') {
-      toast(`Objavljeno: ${targets.length}. Sajt se osvežava za minut-dva.`, 'ok');
+      toast(`Objavljeno: ${targets.length + products}. Sajt se osvežava za minut-dva.`, 'ok');
     } else {
       toast('Sadržaj je objavljen, ali izgradnja sajta nije pokrenuta automatski. '
         + 'Pokrenite „Build and deploy” na GitHub-u.', 'err');

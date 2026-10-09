@@ -93,6 +93,12 @@ def main():
                 missing_assets.append((rel_page, asset))
 
     products = json.load(open(os.path.join(ROOT, 'data', 'products.json'), encoding='utf-8'))
+    # Hidden products are supposed to have neither a page nor an index row.
+    # They stay in products.json so they can be shown again without being
+    # re-imported, so the checks below have to skip them rather than report
+    # the absence they are asking for.
+    hidden = {p['slug'] for p in products if p.get('hidden')}
+    products = [p for p in products if p['slug'] not in hidden]
     missing_pages = [
         p['slug'] for p in products
         if not os.path.isfile(os.path.join(ROOT, 'proizvod', p['slug'], 'index.html'))

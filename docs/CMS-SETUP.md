@@ -41,6 +41,10 @@ admin panel (browser)  ──write──▶  Supabase: draft
 3. Same again with `supabase/migrations/0002_seed_content.sql`. This loads the
    website's current text, so nothing changes on the site.
 
+4. **SQL Editor** → `supabase/migrations/0003_products.sql`. This adds product
+   editing. Until it is run the Proizvodi section reports an error and the
+   build quietly falls back to `data/products.json`, so nothing breaks.
+
 Both files are safe to run again — every statement is `create … if not exists`,
 `create or replace`, `drop … if exists` or `on conflict do update`. If you ran
 an earlier copy of `0001_cms.sql`, re-run it: the first version left the table
@@ -165,16 +169,44 @@ python tools/content.py seed-sql
 The admin panel is served with the site, so `http://localhost:5180/admin/`
 works locally too — it talks to the same Supabase project.
 
+## Products: an overlay, not a second catalogue
+
+`data/products.json` — 1,470 titles imported from crazyvinylshop.rs — stays the
+base and stays in the repository. The `products` table holds **one row per
+edited title, carrying only the fields that differ**. Change a price and what
+is stored is `{"price": 5200}`. A title nobody has touched has no row at all.
+
+At build time `tools/content.py pull` lays the published rows over the base and
+writes the result to `data/products.json` **in the CI workspace only** — the
+workflow never commits, so the copy in git stays the pristine import. Re-import
+the catalogue from the shop and the edits still apply on top.
+
+* `origin = 'catalog'` — an overlay on an imported title.
+* `origin = 'cms'` — a product created in the admin; its patch is the whole
+  record.
+* `deleted = true` — drops the slug on the next publish. The page stays up
+  until then, because a deletion is a draft like any other.
+
+Slugs are the public URLs and are never editable after creation. Hiding or
+deleting a product also removes its generated directory, so GitHub Pages stops
+serving the page rather than keeping a stale copy.
+
+Fields the import does not have — publisher, catalogue number, stock, gallery,
+visibility, featured, related, SEO — were added empty. Nothing was invented for
+the 1,470 existing titles.
+
+`PRODUCT_FIELDS` in `tools/content.py` is the allow-list. A key that is not in
+it is ignored when merging, so a stored patch can never reach `id`, `sourceUrl`
+or `addedAt`. Add a field to the admin and you must add it there too, or it
+will silently never ship.
+
 ## What is deliberately not in the CMS
 
-* **Products.** Artist, title, price, stock, format and tracklist come from the
-  shop's own catalogue (`data/products.json`, imported from crazyvinylshop.rs).
-  Making them editable here would create a second, competing copy. The one
-  thing the catalogue is missing — the sleeve photograph — *is* managed, under
-  **Omoti proizvoda**.
 * **Layout, colours, animation.** These are code.
 * **Online card payment.** The site does not have it; the checkout sends an
   order to the shop. The CMS edits the wording around that, not the mechanism.
+* **The import itself.** Products come from the shop's own listing; the CMS
+  edits them, it does not replace the source.
 
 ## Verifying the security rules
 

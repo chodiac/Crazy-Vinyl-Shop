@@ -41,6 +41,23 @@ DOCS = {
 
 BUCKET = 'media'
 
+# Fields the CMS is allowed to set on a product. Anything else in a stored
+# patch is ignored, so a malformed row can never reach into the catalogue's
+# own bookkeeping (id, sourceUrl, addedAt) or invent a key the build does not
+# know about.
+PRODUCT_FIELDS = {
+    # already in the catalogue
+    'artist', 'title', 'price', 'salePrice', 'onSale', 'available', 'condition',
+    'format', 'genre', 'year', 'country', 'category', 'notes', 'tracklist',
+    # added for the CMS — empty on every imported title, never invented
+    'label', 'catalogNumber', 'stock', 'gallery', 'buyLabel', 'buyState',
+    'hidden', 'featured', 'related', 'seoTitle', 'seoDescription',
+}
+
+# A product created in the CMS has no catalogue row behind it, so it also
+# supplies these.
+PRODUCT_OWN_FIELDS = {'slug', 'id', 'currency', 'image', 'addedAt', 'sourceUrl'}
+
 
 # ---------------------------------------------------------------- utilities
 
@@ -67,7 +84,12 @@ def configured():
                 os.environ.get('SUPABASE_SERVICE_ROLE_KEY'))
 
 
-def api(path, method='GET', body=None, prefer=None):
+def api(path, method='GET', body=None, prefer=None, optional=False):
+    """optional=True returns None instead of aborting.
+
+    For a table the project may not have yet: shipping code that reads a new
+    table must not take the whole deploy down before its migration is run.
+    """
     base = env('SUPABASE_URL').rstrip('/')
     key = env('SUPABASE_SERVICE_ROLE_KEY')
     req = urllib.request.Request(
@@ -86,8 +108,14 @@ def api(path, method='GET', body=None, prefer=None):
             return json.loads(raw) if raw.strip() else None
     except urllib.error.HTTPError as err:
         detail = err.read().decode('utf-8', 'replace')[:400]
+        if optional:
+            print(f'[content] preskočeno ({err.code}): {path}')
+            return None
         sys.exit(f'[content] Supabase {err.code} na {path}\n{detail}')
     except urllib.error.URLError as err:
+        if optional:
+            print(f'[content] preskočeno (nedostupno): {path}')
+            return None
         sys.exit(f'[content] Supabase nedostupan: {err.reason}')
 
 
@@ -140,6 +168,82 @@ def download_site_images(site):
     return saved
 
 
+def merge_products(media_urls):
+    """Lay published product edits over data/products.json.
+
+    The catalogue in the repository stays the base; a row in Supabase exists
+    only for a title somebody edited, and carries only the fields that differ.
+    Nothing here invents a value: a field the editor never filled in stays
+    absent, and the page goes on not showing it.
+    """
+    path = os.path.join(DATA, 'products.json')
+    base = read_json(path)
+    by_slug = {p['slug']: p for p in base}
+    order = [p['slug'] for p in base]
+
+    # Optional on purpose: before 0003_products.sql has been run the table
+    # does not exist, and a build that died over that would take the live site
+    # down for a migration nobody had got to yet.
+    rows = api('products?select=slug,origin,published,deleted'
+               '&published_at=not.is.null', optional=True)
+    if rows is None:
+        print('[content] proizvodi: tabela ne postoji — koristi se data/products.json')
+        return base
+
+    changed = created = removed = 0
+    for row in rows:
+        slug = row['slug']
+        patch = row.get('published') or {}
+
+        if row.get('deleted'):
+            if by_slug.pop(slug, None) is not None:
+                removed += 1
+            continue
+
+        if slug in by_slug:
+            target = by_slug[slug]
+            changed += 1
+        elif row.get('origin') == 'cms':
+            target = {
+                'slug': slug,
+                'id': str(patch.get('id') or f'cms-{slug}'),
+                'currency': 'RSD',
+                'image': f'/images/products/{slug}.jpg',
+                'addedAt': (row.get('published_at') or '')[:10],
+                'sourceUrl': '',
+                'category': 'ostalo',
+                'condition': 'Novo',
+                'available': False,
+                'onSale': False,
+                'salePrice': None,
+                'tracklist': [],
+                'notes': '',
+            }
+            by_slug[slug] = target
+            order.append(slug)
+            created += 1
+        else:
+            # An overlay whose base title is gone from the catalogue. Skip it
+            # rather than resurrect a half-record.
+            print(f'  preskočen overlay bez osnove: {slug}')
+            continue
+
+        for key, value in patch.items():
+            if key in PRODUCT_FIELDS or (row.get('origin') == 'cms' and key in PRODUCT_OWN_FIELDS):
+                target[key] = value
+
+        # Gallery entries are stored as media ids; the site needs URLs.
+        gallery = target.get('gallery')
+        if isinstance(gallery, list) and gallery:
+            target['gallery'] = [media_urls[g] for g in gallery if g in media_urls]
+
+    merged = [by_slug[s] for s in order if s in by_slug]
+    write_json(path, merged)
+    print(f'[content] proizvodi: {len(merged)} ukupno '
+          f'(izmenjeno {changed}, novo {created}, uklonjeno {removed})')
+    return merged
+
+
 def pull():
     """Published content -> data/*.json. Drafts are deliberately ignored."""
     rows = api('content_docs?select=key,published,published_at') or []
@@ -170,6 +274,12 @@ def pull():
         manifest[row['slug']] = {'url': public_url(m['storage_path']),
                                  'alt': m.get('alt') or ''}
     write_json(os.path.join(DATA, 'images.json'), manifest)
+
+    # ---- product edits ----------------------------------------------------
+    media_rows = api('media?select=id,storage_path,alt') or []
+    media_urls = {m['id']: {'url': public_url(m['storage_path']), 'alt': m.get('alt') or ''}
+                  for m in media_rows}
+    merge_products(media_urls)
 
     print(f'[content] povučeno: {", ".join(touched) or "ništa"}')
     print(f'[content] omota proizvoda: {len(manifest)}')

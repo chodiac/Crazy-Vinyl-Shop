@@ -107,6 +107,69 @@ koristi; prvo je tamo zamenite, pa je onda obrišite.
 
 ---
 
+## Proizvodi
+
+**Proizvodi** u levom meniju je ceo katalog radnje — oko 1.470 naslova.
+
+Važno kako to radi: katalog ostaje onakav kakav je uvezen iz radnje, a čuva se
+**samo ono što vi promenite**. Ako izmenite cenu, zapamti se samo cena. Sve
+ostalo i dalje dolazi iz kataloga. Zato ne postoje dve verzije istog podatka.
+
+### Pronalaženje
+
+Pretraga radi po izvođaču, nazivu i slugu. Iznad liste su i četiri filtera:
+format, žanr, stanje (na stanju / rasprodato / na sniženju) i vidljivost
+(prikazano / skriveno / istaknuto / **ima nacrt** / za brisanje).
+
+Filter „ima nacrt" je koristan pred objavu — pokazuje tačno šta čeka.
+
+### Uređivanje
+
+Kliknite **Uredi**. Otvara se forma podeljena po celinama:
+
+| Celina | Šta sadrži |
+| --- | --- |
+| Osnovno | izvođač, naziv, kategorija, format, žanr, godina, zemlja, stanje, izdavačka kuća, kataloški broj |
+| Cena i lager | cena, snižena cena, količina, „na sniženju", „na stanju" |
+| Dugme za poručivanje | tekst dugmeta i da li se uopšte može poručiti |
+| Prikaz | skriveno, istaknuto |
+| Opis | tekst koji se vidi pod „Beleške" |
+| Numere | tracklista, jedna numera po redu |
+| Omot | glavna fotografija |
+| Dodatne fotografije | galerija ispod omota |
+| Povezani naslovi | slugovi, jedan po redu — panel javlja ako neki ne postoji |
+| SEO | naslov i opis za Google; prazno = sastavlja se sam |
+
+**Sačuvaj nacrt** čuva. Na sajtu se i dalje ništa nije promenilo.
+
+### Cena i sniženje
+
+Kad uključite **Na sniženju**, na stranici se *Cena* prikazuje precrtano, a
+*Snižena cena* kao važeća. Ako sniženje isključite, prikazuje se samo cena.
+
+### Skriveno naspram obrisanog
+
+**Skriveno** — proizvod nestaje sa sajta: nema stranicu, nema ga u katalogu ni
+u sitemap-u. Ostaje kod vas i vraća se jednim klikom.
+
+**Obriši** — traži potvrdu i označava proizvod za brisanje. **Stranica ostaje
+na sajtu dok ne kliknete Objavi.** Posle objave adresa više ne postoji.
+
+Ako niste sigurni — sakrijte, nemojte brisati.
+
+### Novi proizvod
+
+**Novi proizvod** gore. Jedino što kasnije ne može da se menja je **slug**,
+jer je to adresa stranice: `/proizvod/<slug>/`. Promena sluga bi pokvarila sve
+postojeće linkove, pa je zaključan posle prvog čuvanja.
+
+### Objavljivanje
+
+Isto dugme **Objavi** kao i za ostatak sajta. U potvrdi se vidi i koliko
+proizvoda odlazi. Posle objave sajt se iznova gradi — minut do dva.
+
+---
+
 ## Omoti proizvoda
 
 Katalog ima oko 1.470 naslova i svaki čeka sliku omota. Dok je nema, na sajtu

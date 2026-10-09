@@ -34,7 +34,7 @@ DATA = os.path.join(ROOT, 'data')
 INDEX_FIELDS = [
     'id', 'slug', 'artist', 'title', 'category', 'price', 'salePrice', 'currency',
     'available', 'onSale', 'condition', 'format', 'genre', 'year', 'country',
-    'origin', 'addedAt', 'trackCount', 'hasNotes',
+    'origin', 'addedAt', 'trackCount', 'hasNotes', 'featured',
 ]
 
 
@@ -473,8 +473,11 @@ def tracks_markup(tracks):
     return f'<div class="tracks">{"".join(out)}</div>'
 
 
-def product_body(p, site):
-    sold = not p['available']
+def product_body(p, site, by_slug=None):
+    # buyState lets the shop override what availability implies — a title can
+    # be in stock but not orderable yet, or kept orderable while restocking.
+    state = p.get('buyState') or 'auto'
+    sold = (state == 'out') or (state == 'auto' and not p['available'])
     sale = bool(p.get('onSale') and p.get('salePrice'))
     price = eff_price(p)
 
@@ -482,13 +485,18 @@ def product_body(p, site):
         ('Format', p.get('format')),
         ('Žanr', p.get('genre')),
         ('Godina', p.get('year')),
+        ('Izdavač', p.get('label')),
         ('Zemlja', p.get('country')),
         ('Stanje', p.get('condition')),
         ('Poreklo', p.get('origin')),
         ('Kategorija', {'ploce': 'Ploče', 'diskovi': 'Diskovi', 'majice': 'Majice',
                         'solje': 'Šolje', 'ostalo': 'Ostalo'}.get(p['category'], p['category'])),
-        ('Kat. broj', f"CVS-{p['id']}"),
+        # A catalogue number typed into the CMS replaces the derived one; an
+        # untouched title keeps CVS-<id>, which is what the page already shows.
+        ('Kat. broj', p.get('catalogNumber') or f"CVS-{p['id']}"),
     ]
+    if isinstance(p.get('stock'), int) and p['stock'] > 0:
+        specs.append(('Na lageru', f"{p['stock']} kom."))
     spec_rows = ''.join(
         f'<div class="specs__row"><span class="specs__k">{e(k)}</span><span class="specs__v">{e(v)}</span></div>'
         for k, v in specs if v not in (None, '', 0)
@@ -502,11 +510,34 @@ def product_body(p, site):
         <div class="notes" style="padding-top:.9rem">{paras}</div>
       </section>'''
 
+    gallery = [g for g in (p.get('gallery') or []) if isinstance(g, dict) and g.get('url')]
+    gallery_html = ''
+    if gallery:
+        shots = ''.join(
+            f'<img class="pdp__shot" src="{e(g["url"])}" alt="{e(g.get("alt") or "")}" '
+            f'loading="lazy" decoding="async" width="300" height="300">'
+            for g in gallery)
+        gallery_html = f'<div class="pdp__gallery">{shots}</div>'
+
     tl = tracks_markup(p.get('tracklist') or [])
     tracks_html = f'''<section style="padding-top:2rem">
       {eyebrow('Numere')}
       <div style="padding-top:.9rem">{tl}</div>
     </section>''' if tl else ''
+
+    # Related titles are plain links: they need no script to appear, they are
+    # crawlable, and an unset field renders nothing at all.
+    related_html = ''
+    rel = [by_slug[s] for s in (p.get('related') or [])
+           if by_slug and s in by_slug and s != p['slug'] and not by_slug[s].get('hidden')]
+    if rel:
+        items = ''.join(
+            f'<li><a class="link-cat" href="/proizvod/{e(r["slug"])}/">{e(display_name(r))}</a></li>'
+            for r in rel[:8])
+        related_html = f'''<section style="padding-top:2rem">
+      {eyebrow('Povezani naslovi')}
+      <ul class="related" style="padding-top:.9rem">{items}</ul>
+    </section>'''
 
     buy = (
         f'''<span class="pdp__status pdp__status--out">Rasprodato</span>
@@ -518,7 +549,7 @@ def product_body(p, site):
           <span class="qty__val" id="pdpQty" aria-live="polite">1</span>
           <button type="button" class="qty__btn" data-qty-inc aria-label="Povećaj količinu">+</button>
         </span>
-        <button type="button" class="btn" id="pdpAdd" data-slug="{e(p['slug'])}">Dodaj u korpu</button>
+        <button type="button" class="btn" id="pdpAdd" data-slug="{e(p['slug'])}">{e(p.get('buyLabel') or 'Dodaj u korpu')}</button>
         <span class="pdp__status pdp__status--in">Na stanju</span>'''
     )
 
@@ -538,6 +569,7 @@ def product_body(p, site):
           <div class="pdp__disc">{vinyl(label=(p.get('artist') or p.get('title') or 'CVS')[:3].upper(), speed=1)}</div>
           <div class="pdp__sleeve">{artwork(p, tag='OMOT / ARTWORK')}</div>
         </div>
+        {gallery_html}
         <div class="pdp__deck">
           <button type="button" class="pdp__rpm" data-rpm="1" aria-pressed="true">33⅓ RPM</button>
           <button type="button" class="pdp__rpm" data-rpm="1.36" aria-pressed="false">45 RPM</button>
@@ -546,7 +578,7 @@ def product_body(p, site):
       </div>
 
       <div>
-        {eyebrow(f"Kat. CVS-{p['id']}")}
+        {eyebrow('Kat. ' + (p.get('catalogNumber') or f"CVS-{p['id']}"))}
         {f'<h1 class="pdp__artist">{e(p["artist"])}</h1>' if p.get('artist') else ''}
         <p class="pdp__title">{e(p.get('title') or p['slug'])}</p>
         {'' if p.get('artist') else '<h1 class="sr-only">' + e(display_name(p)) + '</h1>'}
@@ -563,6 +595,7 @@ def product_body(p, site):
         <div class="specs" style="margin-top:.9rem">{spec_rows}</div>
 
         {tracks_html}
+        {related_html}
         {notes_html}
       </div>
     </div>
@@ -925,6 +958,12 @@ def main():
     privacy = read('privacy.json')
     pages = read('pages.json')
 
+    # A product hidden in the CMS leaves the site completely: no page, no row
+    # in the listing index, no sitemap entry. Half-hiding it would leave a
+    # reachable page that search engines keep serving.
+    hidden = [p for p in products if p.get('hidden')]
+    products = [p for p in products if not p.get('hidden')]
+
     counts = Counter(p['category'] for p in products)
     genre_counts = Counter(p['genre'] for p in products if p.get('genre'))
     top_genres = [g for g, _ in genre_counts.most_common(6)]
@@ -939,6 +978,7 @@ def main():
             p.get('format', ''), p.get('genre', ''), p.get('year'), p.get('country', ''),
             p.get('origin', ''), p.get('addedAt', ''),
             len(p.get('tracklist') or []), bool(p.get('notes')),
+            bool(p.get('featured')),
         ])
     write('data/index.json', json.dumps({'fields': INDEX_FIELDS, 'rows': rows}, ensure_ascii=False))
 
@@ -1069,14 +1109,14 @@ def main():
         if eff_price(p):
             offer['price'] = eff_price(p)
         emit(f'proizvod/{p["slug"]}/index.html',
-             title=f'{label} | Crazy Vinyl Shop',
-             description=desc[:300],
+             title=p.get('seoTitle') or f'{label} | Crazy Vinyl Shop',
+             description=p.get('seoDescription') or desc[:300],
              path=f'/proizvod/{p["slug"]}/', page_kind='product', og_type='product',
-             body=product_body(p, site),
+             body=product_body(p, site, by_slug),
              jsonld={
                  '@context': 'https://schema.org', '@type': 'Product',
                  'name': label,
-                 'sku': f"CVS-{p['id']}",
+                 'sku': p.get('catalogNumber') or f"CVS-{p['id']}",
                  'brand': {'@type': 'Brand', 'name': p.get('artist') or 'Crazy Vinyl Shop'},
                  'category': p['category'],
                  'offers': offer,
@@ -1111,6 +1151,28 @@ def main():
          description=pages['notFound']['seoDescription'], path='/404.html',
          page_kind='doc', body=notfound_body(pages))
 
+    # ---- prune pages for products that no longer exist -------------------
+    # The build only ever writes. Without this, hiding or deleting a product
+    # leaves its old directory in the checkout and GitHub Pages keeps serving
+    # the page — the one thing hiding is supposed to prevent. Only directories
+    # holding nothing but a generated index.html are removed.
+    live_slugs = set(by_slug)
+    pdir = os.path.join(ROOT, 'proizvod')
+    pruned = 0
+    if os.path.isdir(pdir):
+        for name in sorted(os.listdir(pdir)):
+            if name in live_slugs:
+                continue
+            d = os.path.join(pdir, name)
+            if not os.path.isdir(d):
+                continue
+            if os.listdir(d) != ['index.html']:
+                print(f'  ostavljen (nije samo index.html): proizvod/{name}')
+                continue
+            os.remove(os.path.join(d, 'index.html'))
+            os.rmdir(d)
+            pruned += 1
+
     # ---- sitemap + robots ------------------------------------------------
     urls = ['/', '/proizvodi/', '/rasprodaja/', '/kontakt/', '/politika-privatnosti/',
             '/korpa/', '/checkout/'] + [c['href'] for c in categories]
@@ -1142,6 +1204,10 @@ def main():
     print(f'  na stanju  : {sum(1 for p in products if p["available"])}')
     print(f'  rasprodato : {sum(1 for p in products if not p["available"])}')
     print(f'  na sniženju: {len(on_sale)}')
+    if hidden:
+        print(f'hidden (not built)   : {len(hidden)}')
+    if pruned:
+        print(f'pages removed        : {pruned}')
     print(f'images present       : {len(have)} (placeholders for the rest)')
     print(f'index.json rows      : {len(rows)}')
     print(f'asset version        : {asset_fingerprint()}')

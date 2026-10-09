@@ -151,6 +151,47 @@ export async function uploadMedia(file, { width, height, onProgress } = {}) {
   return row;
 }
 
+/* -------------------------------------------------------------- products
+
+   A row exists only for a product someone edited, and holds only the fields
+   that differ from data/products.json. The catalogue is not copied here.     */
+
+export const fetchProductEdits = () =>
+  sb.from('products')
+    .select('slug,origin,draft,published,deleted,draft_updated_at,published_at')
+    .then(unwrap);
+
+export async function saveProductDraft(slug, patch, { origin = 'catalog' } = {}) {
+  const session = await getSession();
+  return sb.from('products').upsert({
+    slug,
+    origin,
+    draft: patch,
+    draft_updated_at: new Date().toISOString(),
+    draft_updated_by: session?.user?.id ?? null,
+  }, { onConflict: 'slug' }).select().single().then(unwrap);
+}
+
+/** Deleting is a draft state too: the site keeps the page until it is published. */
+export async function markProductDeleted(slug, deleted = true) {
+  const session = await getSession();
+  return sb.from('products').update({
+    deleted,
+    draft_updated_at: new Date().toISOString(),
+    draft_updated_by: session?.user?.id ?? null,
+  }).eq('slug', slug).then(unwrap);
+}
+
+/** Drops an unpublished row entirely — used to undo an edit that never went live. */
+export const discardProductDraft = (slug) =>
+  sb.from('products').delete().eq('slug', slug).is('published_at', null).then(unwrap);
+
+export const publishProducts = (slugs, note) =>
+  sb.rpc('publish_products', { p_slugs: slugs ?? null, p_note: note ?? null }).then(unwrap);
+
+export const purgePublishedDeletions = () =>
+  sb.rpc('purge_published_deletions').then(unwrap);
+
 /* ------------------------------------------------------- product artwork */
 
 export const fetchProductImages = () =>

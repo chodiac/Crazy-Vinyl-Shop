@@ -66,11 +66,16 @@ export async function saveDrafts(onlyKeys) {
  * Publishing always saves first. Anything else would let the two drift: the
  * button says "publish what I see", and what the user sees is the working copy.
  */
-export async function publishAll(note) {
+export async function publishAll(note, { products = 0 } = {}) {
   await saveDrafts();
   const targets = unpublishedKeys();
-  if (!targets.length) return { targets: [], runId: null };
-  const runId = await api.publish(targets, note);
+  if (!targets.length && !products) return { targets: [], products: 0, runId: null };
+
+  // Product edits live in their own table, but they go live on the same click:
+  // one publish, one rebuild, one moment where the site changes.
+  let runId = null;
+  if (products) runId = await api.publishProducts(null, note);
+  if (targets.length) runId = await api.publish(targets, note);
   for (const key of targets) {
     state.docs[key].published = clone(state.working[key]);
     state.docs[key].published_at = new Date().toISOString();
@@ -86,7 +91,7 @@ export async function publishAll(note) {
   } catch (err) {
     rebuild = err.message;
   }
-  return { targets, runId, rebuild };
+  return { targets, products, runId, rebuild };
 }
 
 /** Throw away local edits for one document and go back to the stored draft. */

@@ -1322,3 +1322,34 @@
     opacity: .04;
   }
 }
+/* --- product extras the CMS can fill in ---------------------------------
+   All three render only when the field is set, so a catalogue title that was
+   never edited looks exactly as it always did. */
+
+.pdp__gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: .4rem;
+  padding-top: .7rem;
+}
+
+.pdp__shot {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: var(--board);
+  border: 1px solid var(--bone-20);
+}
+
+.paper .pdp__shot { border-color: var(--paper-ink-16); }
+
+.related {
+  display: grid;
+  gap: .45rem;
+  padding: 0;
+  list-style: none;
+  border-top: var(--rule);
+  padding-top: .9rem;
+}
+
+.related li { display: flex; }
