@@ -11,7 +11,7 @@
    Supabase dashboard → Project Settings → API.
    ========================================================================== */
 
-export const SUPABASE_URL = 'https://vydkiarqaphuamuzybhe.supabase.co/rest/v1/';
+export const SUPABASE_URL = 'https://vydkiarqaphuamuzybhe.supabase.co';
 export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5ZGtpYXJxYXBodWFtdXp5YmhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1Njk4OTAsImV4cCI6MjEwNzE0NTg5MH0.rwB1NBderyn0b19XAkhaSGmy2GwtbB78oVzaTahLkFE';
 
 /* Where the public site lives, used by the preview pane. Leave as '..' when
