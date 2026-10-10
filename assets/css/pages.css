@@ -30,24 +30,54 @@
   overflow: hidden;
   display: grid;
   isolation: isolate;
-  background: var(--ink);
 
-  /* The spindle hole is punched clean through the whole stage, so what shows
-     inside it is the real Odeljenja section underneath rather than a paper
-     stand-in you then have to scroll a screenful past. --ap still counts in
-     the same numbers the timeline has always used. */
-  /* .75vmax per unit of --ap: at 100 that is 75vmax, and the furthest a
-     viewport corner can ever be from its centre is 70.7vmax (a square one),
-     so the hole always clears the corners instead of leaving dark wedges. */
-  --apr: calc(var(--ap, 0) * .75vmax);
-  -webkit-mask-image: radial-gradient(circle var(--apr) at 50% 50%, #0000 0 99%, #000 100%);
-  mask-image: radial-gradient(circle var(--apr) at 50% 50%, #0000 0 99%, #000 100%);
+  /* Where the record's centre sits, as a share of the stage. One declaration,
+     two consumers: .hero-disc positions itself by it and the hole aims at it.
+     That is what keeps them together at every width instead of a nudge that
+     happens to look right on one phone. */
+  --disc-top: 50%;
 
   /* once the hole is open the stage still overlaps the crate for a screenful;
      nothing here may swallow a click meant for it. Only the three hero blocks
      take input, and each is tweened with autoAlpha, so the moment they fade
      they are visibility:hidden and stop capturing too. */
   pointer-events: none;
+}
+
+/* --- the veil: the only thing the hole is cut out of ---------------------
+   The mask used to sit on .hero-stage. That meant every frame of the scrub
+   re-rasterised everything the stage contains — the static canvas, the two
+   tube overlays, the promoted type and the record — because a changing mask
+   invalidates the whole subtree it is applied to.
+
+   It is now one childless element carrying the ink and the lamp glow, and
+   nothing else. The hole is cut out of that; the hero's own layers simply
+   fade as it opens, which is what they looked like doing anyway. --- */
+
+.hero-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+
+  background:
+    radial-gradient(58% 62% at 74% 46%, var(--glow-1) 0%, transparent 70%),
+    radial-gradient(40% 50% at 18% 18%, var(--glow-2) 0%, transparent 70%),
+    var(--ink);
+
+  /* .75vmax per unit of --ap: at 100 that is 75vmax, and the furthest a
+     viewport corner can ever be from its centre is 70.7vmax (a square one),
+     so the hole always clears the corners instead of leaving dark wedges.
+     The centre is the record's centre, tracked through the whole animation:
+     --disc-x is the same number that moves the disc, and --disc-top the same
+     share that positions it. Scaling does not enter into it — the disc scales
+     about its own centre, so the centre does not move. */
+  --apr: calc(var(--ap, 0) * .75vmax);
+  --apx: calc(50% + var(--disc-x, 22) * 1vw);
+  -webkit-mask-image:
+    radial-gradient(circle var(--apr) at var(--apx) var(--disc-top), #0000 0 99%, #000 100%);
+  mask-image:
+    radial-gradient(circle var(--apr) at var(--apx) var(--disc-top), #0000 0 99%, #000 100%);
 }
 
 .hero-inner { pointer-events: none; }
@@ -67,18 +97,6 @@
   z-index: 0;
   margin-top: -136svh;   /* 100svh of stage + 16svh early + 20svh of landing */
   padding-top: 20svh;
-}
-
-/* ambient lamp glow behind the record */
-.hero-stage::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background:
-    radial-gradient(58% 62% at 74% 46%, var(--glow-1) 0%, transparent 70%),
-    radial-gradient(40% 50% at 18% 18%, var(--glow-2) 0%, transparent 70%);
-  pointer-events: none;
 }
 
 /* The record is black in both themes. On paper that would swallow the dark
@@ -223,7 +241,6 @@
   letter-spacing: -.015em;
   text-transform: uppercase;
   display: grid;
-  will-change: transform;
 }
 
 /* The drawn lockup carries the same words as the type stack, so it simply
@@ -249,7 +266,7 @@
 }
 
 .hero-word__line { display: block; overflow: hidden; }
-.hero-word__line > span { display: block; will-change: transform; }
+.hero-word__line > span { display: block; }
 .hero-word__line:nth-child(2) > span { color: var(--terra); }
 
 .hero-lede {
@@ -304,7 +321,7 @@
 .hero-disc {
   position: absolute;
   z-index: 1;
-  top: 50%;
+  top: var(--disc-top, 50%);
   left: 50%;
   width: min(126vh, 92vw);
   /* --disc-x is a unitless number of vw and --disc-s a plain ratio, so the
@@ -316,10 +333,12 @@
 }
 
 @media (max-width: 860px) {
+  /* The record drops below the lockup on a phone, so the hole has to drop
+     with it. Setting the share on the stage moves both at once. */
+  .hero-stage { --disc-top: 70%; }
+
   .hero-disc {
-    top: 70%;
     width: min(96vh, 100vw);
-    translate: calc(-50% + var(--disc-x, 22) * 1vw) -50%;
     opacity: .92;
   }
 
@@ -337,6 +356,11 @@
 
 /* keep the copy above both backdrop layers */
 .grooved > .wrap { position: relative; z-index: 1; }
+
+/* Paused when the section is off screen — see initGroovePause. A scale and
+   opacity loop on an element this size is not free just because it is
+   subtle. */
+.grooved.is-idle::before { animation-play-state: paused; }
 
 .grooved::before {
   content: '';
@@ -415,6 +439,9 @@
   position: static;
   height: auto;
   min-height: 100svh;
+}
+
+:root.rm .hero-veil, .no-js .hero-veil {
   -webkit-mask-image: none;
   mask-image: none;
 }

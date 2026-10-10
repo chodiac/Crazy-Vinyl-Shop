@@ -48,6 +48,32 @@ def set_asset_version(version):
     ASSET_VER = version
 
 
+JS_MODULES = []
+
+
+def set_js_modules(names):
+    global JS_MODULES
+    JS_MODULES = list(names)
+
+
+def import_map(ver):
+    """Version every module, not just the entry.
+
+    A query on a module's URL is not inherited by the static imports inside
+    it: main.js?v=… would load fresh and then pull ui.js, motion.js and the
+    rest through their bare names, straight from whatever the browser had
+    cached. An import map is matched against resolved URLs, so it reaches
+    every module however it was reached.
+    """
+    if not ver or not JS_MODULES:
+        return ''
+    rows = ',\n'.join(
+        f'    "__ROOT__/assets/js/{n}": "__ROOT__/assets/js/{n}{ver}"'
+        for n in JS_MODULES)
+    return ('<script type="importmap">\n{\n  "imports": {\n'
+            + rows + '\n  }\n}\n</script>\n')
+
+
 def set_logos(logo, label_logo, wordmark=None):
     global LOGO, LABEL_LOGO, WORDMARK
     LOGO, LABEL_LOGO, WORDMARK = logo, label_logo, wordmark
@@ -334,7 +360,7 @@ def page(*, title, description, path, body, site, categories, counts, genres,
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-{BOOT_SCRIPT}
+{import_map(ver)}{BOOT_SCRIPT}
 <link rel="stylesheet" href="/assets/css/base.css{ver}">
 <link rel="stylesheet" href="/assets/css/components.css{ver}">
 <link rel="stylesheet" href="/assets/css/pages.css{ver}">

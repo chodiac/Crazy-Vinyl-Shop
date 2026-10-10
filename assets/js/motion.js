@@ -46,6 +46,8 @@ function onScroll() {
 
 const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
 
+let globalBound = false;
+
 function tick(now) {
   const dt = Math.min(64, now - (tick.prev || now));
   tick.prev = now;
@@ -100,7 +102,13 @@ export function initVinyl(root = document) {
     io?.observe(el);
   });
 
-  if (!spinners.some((s) => s.el.dataset.scrollBound)) {
+  // Bound once for the page, not once per call. The old guard read a dataset
+  // flag nothing ever wrote, so every "Prikazi jos" on the catalogue added
+  // another scroll listener and another visibilitychange listener — and with
+  // several of them sharing lastT, each extra one saw dt near zero and threw
+  // the velocity reading to its ceiling.
+  if (!globalBound) {
+    globalBound = true;
     window.addEventListener('scroll', onScroll, { passive: true });
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) stop();
@@ -176,6 +184,7 @@ export function initHeroTransition() {
 
   const stage = $('.hero-stage', rig);
   const disc = $('.hero-disc', rig);
+  const tube = $$('.tv, .tv-lines, .tv-roll', rig);
   const type = $('.hero-type', rig);
   const rail = $('.hero-rail', rig);
   const actions = $('.hero-actions', rig);
@@ -185,8 +194,11 @@ export function initHeroTransition() {
   // must match the CSS resting offset, or the disc jumps on load
   const START_X = 22;
 
-  gsap.set(disc, { '--disc-x': START_X, '--disc-s': 1, opacity: 1 });
-  gsap.set(stage, { '--ap': 0 });
+  // --disc-x and --disc-s are set on the stage, not the disc: the disc and
+  // the veil both read them, and a custom property only travels downwards.
+  // One source, so the hole cannot drift away from the record it is cut from.
+  gsap.set(stage, { '--disc-x': START_X, '--disc-s': 1, '--ap': 0 });
+  gsap.set(disc, { opacity: 1 });
 
   const tl = gsap.timeline({
     defaults: { ease: 'none' },
@@ -205,7 +217,7 @@ export function initHeroTransition() {
   });
 
   // 1 — the record slides to centre and grows: we move toward the label
-  tl.to(disc, { '--disc-x': 0, '--disc-s': 1.55, duration: 0.5 }, 0)
+  tl.to(stage, { '--disc-x': 0, '--disc-s': 1.55, duration: 0.5 }, 0)
     // 2 — the wordmark lifts out of frame
     // autoAlpha, not opacity: at 0 it also sets visibility:hidden, which is
     // what stops the faded hero copy from intercepting clicks on the crate
@@ -213,13 +225,17 @@ export function initHeroTransition() {
     .to(type, { yPercent: -36, autoAlpha: 0, duration: 0.4 }, 0)
     .to([rail, actions], { autoAlpha: 0, y: -24, duration: 0.3 }, 0)
     // 3 — keep pushing in until the centre label fills the frame
-    .to(disc, { '--disc-s': 4.4, duration: 0.26 }, 0.48)
+    .to(stage, { '--disc-s': 4.4, duration: 0.26 }, 0.48)
     // 4 — the spindle hole opens through the stage onto the shop itself.
     // It ramps well past the radius that covers the screen (a square viewport,
     // the worst case, is clear at --ap 94) so the corners are gone by ~0.77
     // whatever the aspect ratio. Stopping the ramp near that radius meant a
     // near-square window still had the record biting into the crate's left
     // edge while the section had already scrolled into place.
+    // The tube layers sit above the veil, so they have to be gone before the
+    // hole is wide enough to matter, or they would speckle the section showing
+    // through it.
+    .to(tube, { autoAlpha: 0, duration: 0.14 }, 0.46)
     .to(stage, { '--ap': 9, duration: 0.12 }, 0.50)
     .to(stage, { '--ap': 190, duration: 0.26 }, 0.62)
     // the record fades out behind the fully open hole
@@ -268,10 +284,32 @@ export function initParallax(root = document) {
    boot
    ========================================================================== */
 
+/**
+ * The record behind Odeljenja pulses forever. It is subtle, but it is a scale
+ * and opacity loop on an element close to a thousand pixels across, and it ran
+ * on while the section was nowhere near the screen.
+ */
+export function initGroovePause(root = document) {
+  if (!('IntersectionObserver' in window)) return;
+  const els = $$('.grooved', root).filter((el) => !el.dataset.pauseBound);
+  if (!els.length) return;
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => e.target.classList.toggle('is-idle', !e.isIntersecting));
+  }, { rootMargin: '200px' });
+
+  els.forEach((el) => {
+    el.dataset.pauseBound = '1';
+    el.classList.add('is-idle');
+    io.observe(el);
+  });
+}
+
 export function initMotion(root = document) {
   initVinyl(root);
   initReveals(root);
   initParallax(root);
+  initGroovePause(root);
   if (hasGsap) {
     // Fonts change metrics; recalculate once they land.
     document.fonts?.ready.then(() => ScrollTrigger.refresh());
