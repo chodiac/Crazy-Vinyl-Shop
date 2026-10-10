@@ -71,6 +71,59 @@ def asset_fingerprint():
     return h.hexdigest()[:8]
 
 
+def admin_files():
+    """Everything under admin/ the browser caches: the stylesheet and the
+    modules, including config.js, which the modules import."""
+    out = []
+    adm = os.path.join(ROOT, 'admin')
+    for rel in ('admin.css', 'config.js'):
+        if os.path.isfile(os.path.join(adm, rel)):
+            out.append(rel)
+    jsdir = os.path.join(adm, 'js')
+    if os.path.isdir(jsdir):
+        out += [f'js/{n}' for n in sorted(os.listdir(jsdir)) if n.endswith('.js')]
+    return out
+
+
+def stamp_admin():
+    """Rewrite the versioned asset block in admin/index.html.
+
+    A query string on a module's entry URL is not inherited by the static
+    imports inside it, so versioning app.js alone would load a fresh entry
+    against stale siblings. An import map is matched against resolved URLs,
+    which reaches every module however it was imported.
+    """
+    index = os.path.join(ROOT, 'admin', 'index.html')
+    if not os.path.isfile(index):
+        return None, 0
+
+    files = admin_files()
+    h = hashlib.sha1()
+    for rel in files:
+        with open(os.path.join(ROOT, 'admin', rel), 'rb') as fh:
+            h.update(rel.encode())
+            h.update(fh.read())
+    ver = h.hexdigest()[:8]
+
+    mapping = ',\n'.join(f'    "./{rel}": "./{rel}?v={ver}"'
+                          for rel in files if rel.endswith('.js'))
+    block = (
+        '<link rel="stylesheet" href="./admin.css?v=' + ver + '">\n'
+        '<script type="importmap">\n{\n  "imports": {\n'
+        + mapping + '\n  }\n}\n</script>\n'
+        '<script type="module" src="./js/app.js?v=' + ver + '"></script>'
+    )
+
+    html = open(index, encoding='utf-8').read()
+    start = html.index('<!-- cms:assets')
+    head_end = html.index('-->', start) + 3
+    end = html.index('<!-- /cms:assets -->')
+    out = html[:head_end] + '\n' + block + '\n' + html[end:]
+    if out != html:
+        open(index, 'w', encoding='utf-8', newline='\n').write(out)
+    return ver, len(files)
+
+
 def read(name):
     with open(os.path.join(DATA, name), encoding='utf-8') as fh:
         return json.load(fh)
@@ -1196,6 +1249,8 @@ def main():
     # file, and the whole site looks changed on each build.
     write('.gitattributes', GITATTRIBUTES)
 
+    admin_ver, admin_n = stamp_admin()
+
     # ---- report ----------------------------------------------------------
     print(f'pages written        : {len(written)}')
     print(f'products             : {len(by_slug)}')
@@ -1211,6 +1266,8 @@ def main():
     print(f'images present       : {len(have)} (placeholders for the rest)')
     print(f'index.json rows      : {len(rows)}')
     print(f'asset version        : {asset_fingerprint()}')
+    if admin_ver:
+        print(f'admin version        : {admin_ver} ({admin_n} fajlova)')
     print('links                : ' + ('absolute under ' + base if base else 'relative (portable)'))
     print('header logo          : ' + (logo or 'typographic fallback')
           + (' [' + logo_note + ']' if logo_note else ''))

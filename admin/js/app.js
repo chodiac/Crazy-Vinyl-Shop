@@ -9,7 +9,7 @@ import { renderSection } from './fields.js';
 import { renderMediaView, loadMedia } from './media.js';
 import { renderProductsView } from './products.js';
 import {
-  renderCatalogView, pendingCount, preloadEdits, publishPending,
+  renderCatalogView, pendingCount, preloadEdits, publishPending, onCatalogChange,
 } from './catalog.js';
 import { openPreview } from './preview.js';
 import { $, $$, el, clear, toast, confirmDialog, dateTime } from './ui.js';
@@ -122,6 +122,7 @@ async function startPanel() {
   }
   buildNav();
   store.onChange(syncChrome);
+  onCatalogChange(syncChrome);
   syncChrome();
   navigate(location.hash.slice(1) || 'pocetna');
 }

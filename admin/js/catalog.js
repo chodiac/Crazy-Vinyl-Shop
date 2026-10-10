@@ -44,6 +44,14 @@ let edits = new Map();      // slug -> supabase row
 let covers = new Map();     // slug -> { media_id }
 let facets = { format: new Set(), genre: new Set(), condition: new Set() };
 
+// The publish button lives in app.js and is driven by syncChrome(). Saving a
+// product draft changes whether there is anything to publish, so it has to
+// say so — otherwise the button stays disabled until something else happens
+// to call syncChrome, which in practice meant reloading the page.
+const listeners = new Set();
+export const onCatalogChange = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };
+const emit = () => listeners.forEach((fn) => fn());
+
 /* ------------------------------------------------------------------ data */
 
 async function loadBase() {
@@ -66,6 +74,9 @@ async function loadEdits() {
   edits = new Map(rows.map((r) => [r.slug, r]));
   const imgs = await api.fetchProductImages();
   covers = new Map(imgs.map((r) => [r.slug, r]));
+  // Every path that refreshes the rows ends here, so this is the one place
+  // the count can change — and the only place that needs to announce it.
+  emit();
 }
 
 /** What the product looks like with the unpublished edits applied. */
