@@ -280,6 +280,16 @@ grant select                         on public.publish_runs     to authenticated
 -- publish_docs(), which is SECURITY DEFINER, so no insert privilege — and no
 -- sequence privilege — is handed to the caller.
 
+-- service_role is the build. tools/content.py reads published content and the
+-- media rows with the service key, and `content.py push` writes the documents
+-- when seeding. Granting this explicitly rather than relying on the project's
+-- default privileges is the difference between a deploy that works and one
+-- that goes out green with the content silently missing.
+grant select, insert, update on public.content_docs   to service_role;
+grant select                 on public.content_versions to service_role;
+grant select                 on public.media           to service_role;
+grant select                 on public.product_images  to service_role;
+
 -- =========================================================================
 -- Row level security
 --

@@ -59,6 +59,26 @@ is reached. The current file grants them explicitly, to `authenticated` only.
    nothing. The **service_role** key is the secret one and must never appear in
    `admin/`, `assets/` or any committed file.
 
+### Grants are explicit, on purpose
+
+Row level security only gets a say once the role already holds the table
+privilege, and this project does **not** apply default privileges to tables
+created from the SQL editor. Every grant the system needs is therefore written
+out in the migrations, for two roles:
+
+* **`authenticated`** — the admin panel in the browser. RLS then narrows it to
+  admins.
+* **`service_role`** — the build. `tools/content.py` reads the published rows
+  with the service key.
+
+`anon` is granted nothing anywhere. The public site is static HTML and never
+queries the database.
+
+Leaving a table out of the `service_role` list does not fail loudly. It
+produces a green deploy of a site that is silently missing everything that
+table holds, which is how the first product publish appeared to succeed and
+changed nothing. If you add a table that the build reads, grant it here.
+
 ### First admin
 
 1. **Authentication → Users → Add user** → e-mail + password, and tick
@@ -207,6 +227,23 @@ will silently never ship.
   order to the shop. The CMS edits the wording around that, not the mechanism.
 * **The import itself.** Products come from the shop's own listing; the CMS
   edits them, it does not replace the source.
+
+## When a publish does not reach the site
+
+`supabase/diagnostics/publish-check.sql` is read-only and walks the chain in
+order: the product rows, what `publish_products()` reported, and whether each
+role can read the tables. The first result that looks wrong is the broken
+link.
+
+* `published_at` null, or `draft_equals_published` false → the copy never
+  happened; look at `publish_runs.detail`, which records how many rows the
+  UPDATE matched.
+* `service_role / can_select = false` on a table → the build gets 401. Since
+  the error handling was tightened this stops the build instead of deploying
+  a half-empty site, but the grant is still the fix.
+* Everything true and the site still stale → check that the Actions run
+  finished and that the admin was hard-refreshed; files under `admin/` are not
+  fingerprinted, so a browser will happily keep running the old panel.
 
 ## Verifying the security rules
 

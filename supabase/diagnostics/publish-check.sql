@@ -8,6 +8,12 @@
 -- published -> GitHub Actions runs tools/content.py pull, which reads rows
 -- WHERE published_at IS NOT NULL -> build -> deploy. Each query below checks
 -- one link, in order, so the first one that looks wrong is the broken link.
+--
+-- Known once already: query 3 came back false for service_role on
+-- public.products. The database had the published rows, the build could not
+-- read them, and the deploy went out green with nothing applied. The grant is
+-- now written into 0003_products.sql, so this should not recur — but it is
+-- the first thing to check if a publish ever goes quiet again.
 -- ===========================================================================
 
 -- 1 ── the edited products, and whether the publish actually took.

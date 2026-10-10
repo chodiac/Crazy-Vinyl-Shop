@@ -150,12 +150,24 @@ grant execute on function public.purge_published_deletions() to authenticated;
 -- =========================================================================
 -- Privileges and row level security
 --
--- authenticated only; anon is granted nothing. The public site is static HTML
--- and reads products from the built files, never from here.
+-- anon is granted nothing: the public site is static HTML and reads products
+-- from the built files, never from here.
 -- =========================================================================
 
 grant select, insert, update, delete on public.products         to authenticated;
 grant select                         on public.product_versions to authenticated;
+
+-- service_role is the build. tools/content.py connects with the service key
+-- to read published rows, and without this it gets 401 and the deploy goes
+-- out green and silently missing every product edit — which is exactly what
+-- happened before this line existed. Do not leave it to the project's default
+-- privileges: they do not cover tables created from the SQL editor here.
+--
+-- Withholding privileges from service_role buys nothing. It is the secret
+-- server identity, it already bypasses RLS, and anyone holding that key is
+-- trusted by definition. All it can produce is a silent failure.
+grant select on public.products         to service_role;
+grant select on public.product_versions to service_role;
 
 alter table public.products         enable row level security;
 alter table public.product_versions enable row level security;
@@ -168,3 +180,15 @@ create policy products_all on public.products
 drop policy if exists product_versions_select on public.product_versions;
 create policy product_versions_select on public.product_versions
   for select to authenticated using (public.is_admin());
+
+-- The publish Edge Function marks the run as dispatched once GitHub has
+-- accepted it. 0001 gave publish_runs a select policy and a select grant
+-- only, so that write was refused and — because the function does not check
+-- the result — the status sat at 'queued' forever, making the diagnostics
+-- read as though no rebuild had ever been requested.
+grant update (status, detail) on public.publish_runs to authenticated;
+
+drop policy if exists publish_runs_update on public.publish_runs;
+create policy publish_runs_update on public.publish_runs
+  for update to authenticated
+  using (public.is_admin()) with check (public.is_admin());
