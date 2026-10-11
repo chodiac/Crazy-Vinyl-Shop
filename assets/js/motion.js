@@ -184,7 +184,6 @@ export function initHeroTransition() {
 
   const stage = $('.hero-stage', rig);
   const disc = $('.hero-disc', rig);
-  const tube = $$('.tv, .tv-lines, .tv-roll', rig);
   const type = $('.hero-type', rig);
   const rail = $('.hero-rail', rig);
   const actions = $('.hero-actions', rig);
@@ -232,10 +231,6 @@ export function initHeroTransition() {
     // whatever the aspect ratio. Stopping the ramp near that radius meant a
     // near-square window still had the record biting into the crate's left
     // edge while the section had already scrolled into place.
-    // The tube layers sit above the veil, so they have to be gone before the
-    // hole is wide enough to matter, or they would speckle the section showing
-    // through it.
-    .to(tube, { autoAlpha: 0, duration: 0.14 }, 0.46)
     .to(stage, { '--ap': 9, duration: 0.12 }, 0.50)
     .to(stage, { '--ap': 190, duration: 0.26 }, 0.62)
     // the record fades out behind the fully open hole

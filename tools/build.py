@@ -337,7 +337,6 @@ def home_body(site, categories, counts, products, pages, wordmark=None):
 
     return f'''<section class="hero-rig" id="heroRig">
   <div class="hero-stage">
-    <div class="hero-veil" aria-hidden="true"></div>
     <canvas class="tv" id="tvStatic" aria-hidden="true"></canvas>
     <div class="tv-lines" aria-hidden="true"></div>
     <div class="tv-roll" aria-hidden="true"></div>
