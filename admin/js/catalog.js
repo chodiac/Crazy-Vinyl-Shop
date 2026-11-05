@@ -356,34 +356,64 @@ function openEditor(slug, afterSave) {
       ? `Ne postoje: ${unknown.slice(0, 4).join(', ')}` : '';
   });
 
-  /* --- cover ------------------------------------------------------------ */
+  /* --- cover ------------------------------------------------------------
+     The cover is keyed by slug in its own table, and a product being created
+     has no slug yet. That is why this used to be disabled for a new product —
+     which left no way to give one a cover at the moment you are making it,
+     and said so only in a tooltip nobody sees on a phone.
+
+     The choice is held here instead and written when the draft is saved, by
+     which point the slug exists. Closing without saving writes nothing, which
+     is also how the rest of the form behaves. */
+  let coverChange;          // undefined = untouched, row = set, null = remove
+
   const coverHost = el('div', { class: 'img-slot' });
   const drawCover = () => {
     clear(coverHost);
-    const c = slug ? covers.get(slug) : null;
-    const media = c ? mediaById(c.media_id) : null;
+    const stored = slug ? covers.get(slug) : null;
+    const media = coverChange === undefined
+      ? (stored ? mediaById(stored.media_id) : null)
+      : coverChange;
+
     coverHost.append(
       media
         ? el('img', { class: 'img-slot__preview', src: thumbUrl(media, 200), alt: '' })
         : el('div', { class: 'img-slot__preview' }),
       el('div', {},
         el('p', { class: 'field__help', text: `Preporuka: ${PRODUCT_IMAGE_HINT.recommended}` }),
+        coverChange !== undefined
+          ? el('p', { class: 'field__help', text: 'Primenjuje se kada sačuvate nacrt.' })
+          : null,
         el('div', { style: 'display:flex;gap:.4rem;margin-top:.5rem;flex-wrap:wrap' },
           el('button', {
             class: 'btn btn--sm', type: 'button',
-            disabled: isNew,
-            title: isNew ? 'Prvo sačuvajte proizvod' : '',
             onclick: async () => {
               const picked = await pickMedia({ title: 'Omot', hint: PRODUCT_IMAGE_HINT });
               if (!picked) return;
-              await api.setProductImage(slug, picked.id);
-              covers.set(slug, { slug, media_id: picked.id });
+              coverChange = picked;
               drawCover();
-              toast('Omot dodeljen. Objavite da se vidi na sajtu.', 'ok');
             },
-          }, media ? 'Zameni omot' : 'Dodaj omot'))));
+          }, media ? 'Zameni omot' : 'Dodaj omot'),
+          media
+            ? el('button', {
+              class: 'btn btn--sm', type: 'button',
+              onclick: () => { coverChange = null; drawCover(); },
+            }, 'Ukloni omot')
+            : null)));
   };
   drawCover();
+
+  /** Writes the held choice once the product has a slug. */
+  async function applyCover(targetSlug) {
+    if (coverChange === undefined) return;
+    if (coverChange === null) {
+      await api.clearProductImage(targetSlug);
+      covers.delete(targetSlug);
+    } else {
+      await api.setProductImage(targetSlug, coverChange.id);
+      covers.set(targetSlug, { slug: targetSlug, media_id: coverChange.id });
+    }
+  }
 
   /* --- gallery ---------------------------------------------------------- */
   const galleryHost = el('div');
@@ -534,6 +564,8 @@ function openEditor(slug, afterSave) {
         try {
           const patch = diffPatch(targetSlug, draft, origin);
           await api.saveProductDraft(targetSlug, patch, { origin });
+          // Only now does the slug exist, so the cover can be attached to it.
+          await applyCover(targetSlug);
           await loadEdits();
           $('#modal').hidden = true;
           toast('Nacrt sačuvan. Nije još na sajtu — kliknite Objavi.', 'ok');
