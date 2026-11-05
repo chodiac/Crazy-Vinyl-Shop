@@ -104,14 +104,19 @@ export function dropzone(onFiles, note) {
 /* ---------------------------------------------------------------- picker */
 
 /** Modal image picker. Resolves to a media row, or null if cancelled. */
+/**
+ * Modal image picker. Resolves to a media row, or null if cancelled.
+ *
+ * It builds its own overlay rather than reusing #modal. The product editor is
+ * already in #modal, and writing the picker into it destroyed the form: the
+ * fields were gone, the held values with them, and closing the picker looked
+ * like being thrown out of the editor with nothing saved.
+ */
 export async function pickMedia({ title = 'Izaberite sliku', hint = {} } = {}) {
   await loadMedia();
 
   return new Promise((resolve) => {
     let chosen = null;
-
-    $('#modalTitle').textContent = title;
-    const body = clear($('#modalBody'));
     const grid = el('div', { class: 'media-grid' });
 
     const paint = () => {
@@ -120,35 +125,52 @@ export async function pickMedia({ title = 'Izaberite sliku', hint = {} } = {}) {
         grid.append(el('p', { class: 'empty-note', text: 'Biblioteka je prazna. Otpremite prvu sliku.' }));
       }
       for (const row of rows) {
-        const tile = el('button', {
+        grid.append(el('button', {
           class: 'media-tile', type: 'button',
           'aria-pressed': chosen?.id === row.id ? 'true' : 'false',
           onclick: () => { chosen = row; paint(); },
         },
           el('img', { class: 'media-tile__img', src: thumbUrl(row, 240), alt: row.alt || '', loading: 'lazy' }),
-          el('span', { class: 'media-tile__name', text: row.filename }));
-        grid.append(tile);
+          el('span', { class: 'media-tile__name', text: row.filename })));
       }
     };
 
     paint();
-    body.append(
-      hint.recommended ? el('p', { class: 'field__help', text: `Preporuka: ${hint.recommended}` }) : null,
-      dropzone(async (files) => { await uploadFiles(files); paint(); }),
-      el('div', { style: 'height:.8rem' }),
-      grid);
 
-    const foot = clear($('#modalFoot'));
-    foot.append(
-      el('button', { class: 'btn', type: 'button', onclick: () => done(null) }, 'Odustani'),
-      el('button', { class: 'btn btn--primary', type: 'button', onclick: () => done(chosen) }, 'Izaberi'));
+    const confirm = el('button', {
+      class: 'btn btn--primary', type: 'button', onclick: () => done(chosen),
+    }, 'Izaberi');
+
+    const overlay = el('div', { class: 'modal modal--picker' },
+      el('div', { class: 'modal__scrim', onclick: () => done(null) }),
+      el('div', { class: 'modal__card', role: 'dialog', 'aria-modal': 'true' },
+        el('h2', { class: 'modal__title', text: title }),
+        el('div', { class: 'modal__body' },
+          hint.recommended ? el('p', { class: 'field__help', text: `Preporuka: ${hint.recommended}` }) : null,
+          dropzone(async (files) => { await uploadFiles(files); paint(); }),
+          el('div', { style: 'height:.8rem' }),
+          grid),
+        el('div', { class: 'modal__foot' },
+          el('button', { class: 'btn', type: 'button', onclick: () => done(null) }, 'Odustani'),
+          confirm)));
+
+    // Capturing, so Escape closes the picker without also reaching the
+    // document handler that closes whatever is in #modal underneath it.
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      e.stopPropagation();
+      done(null);
+    };
+    document.addEventListener('keydown', onKey, true);
 
     function done(value) {
-      $('#modal').hidden = true;
+      document.removeEventListener('keydown', onKey, true);
+      overlay.remove();
       resolve(value);
     }
 
-    $('#modal').hidden = false;
+    document.body.append(overlay);
+    confirm.focus();
   });
 }
 

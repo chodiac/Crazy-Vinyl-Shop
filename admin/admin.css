@@ -500,6 +500,10 @@ textarea.input { min-height: 5.5em; resize: vertical; line-height: 1.5; }
 /* --------------------------------------------------------------- modal */
 
 .modal { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 1rem; }
+
+/* The picker opens on top of whatever is already in a modal — the product
+   editor, usually — so it needs to sit above it rather than replace it. */
+.modal--picker { z-index: 85; }
 .modal__scrim { position: absolute; inset: 0; background: rgba(10, 9, 7, .6); }
 
 .modal__card {
