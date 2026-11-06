@@ -91,8 +91,14 @@ function effective(slug) {
 function pending(slug) {
   const row = edits.get(slug);
   if (!row) return false;
-  if (row.deleted && row.published_at === null) return true;
-  if (row.deleted) return true;
+
+  // A row marked deleted is already acted on: tools/content.py reads the flag
+  // straight off the row, so the next build drops the slug whether or not
+  // anything was published. Counting it as outstanding meant it stayed in the
+  // tally for ever, and a publish that had nothing else to do reported that
+  // the database had refused everything.
+  if (row.deleted) return false;
+
   return JSON.stringify(row.draft ?? {}) !== JSON.stringify(row.published ?? null);
 }
 

@@ -281,14 +281,25 @@ $('#publishBtn').addEventListener('click', async () => {
     return;
   }
 
+  const asked = docs.requested.length + items.requested.length;
   const landed = docs.published.length + items.published.length;
   const failed = (docs.requested.length - docs.published.length) + items.stillPending.length;
 
-  // The database accepted nothing. Saying "objavljeno" here is exactly the
-  // lie this reports instead.
+  // Nothing was outstanding. Not a failure — say so plainly rather than
+  // blaming the database for refusing work nobody asked it to do.
+  if (!asked) {
+    toast('Nema izmena za objavu.');
+    syncChrome();
+    if (route === 'proizvodi') navigate('proizvodi');
+    return;
+  }
+
+  // Asked for something and got none of it back. Report the numbers: the
+  // first version of this guessed at permissions and sent me looking in the
+  // wrong place.
   if (!landed) {
-    toast('Ništa nije objavljeno — baza nije prihvatila izmene. '
-      + 'Nacrti su sačuvani. Proverite dozvole i pokušajte ponovo.', 'err');
+    toast(`Ništa nije objavljeno — baza je prihvatila 0 od ${asked}. `
+      + 'Nacrti su sačuvani. Detalji su u konzoli pregledača.', 'err');
     console.error('[cms] publish landed nothing', { docs, items });
     syncChrome();
     if (route === 'proizvodi') navigate('proizvodi');
