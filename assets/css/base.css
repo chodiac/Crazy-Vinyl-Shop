@@ -197,6 +197,16 @@ ul, ol { padding: 0; list-style: none; }
 img, svg, video { display: block; max-width: 100%; }
 img { height: auto; }
 
+/* The browser hides [hidden] with `display: none`, but that rule lives in the
+   user-agent stylesheet and any class of ours that sets `display` outranks it.
+   `.receipt` did exactly that: the order receipt is written only after an
+   order goes through, so the empty container sat on the checkout page as a
+   bordered, padded white box above Način isporuke. Several other classes
+   (.chips, .opt__box, .marquee__group, .hero-scroll__line) set display on
+   elements that are also rendered hidden, so this is the whole family, not
+   one element. */
+[hidden] { display: none !important; }
+
 button, input, select, textarea {
   font: inherit;
   color: inherit;
