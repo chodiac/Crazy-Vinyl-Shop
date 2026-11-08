@@ -51,10 +51,13 @@ admin panel (browser)  ──write──▶  Supabase: draft
    reads — and backfills it for deletions that have already gone out, so the
    live site does not change when you run it.
 
-   On a project that has `0003` but not this, `tools/content.py` prints
-   `kolona published_deleted ne postoji` and keeps the old behaviour: a
-   deletion applies on the next build without being published. Nothing fails,
-   but the mark is not reversible until the migration is run.
+   On a project that has `0003` but not this, both the build and the panel
+   detect the missing column and keep the old behaviour: a deletion applies on
+   the next build without being published, the panel says so in the
+   confirmation dialog, and it does not offer the deletion to Objavi. That
+   last part matters — the old `publish_products` has no deletion in its
+   `WHERE` clause, so a deletion offered to it cannot publish, and the button
+   would sit on a count that never goes down.
 
 All four files are safe to run again — every statement is `create … if not exists`,
 `create or replace`, `drop … if exists` or `on conflict do update`. If you ran

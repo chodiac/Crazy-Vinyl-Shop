@@ -41,6 +41,17 @@ const BUY_STATES = [
 let base = null;            // slug -> catalogue record
 let baseOrder = [];         // catalogue order
 let edits = new Map();      // slug -> supabase row
+
+/* Does this database gate deletion behind Objavi?
+ *
+ * True once 0004_delete_via_publish.sql has run, and read off the rows rather
+ * than assumed, because the two can be upgraded in either order. It matters
+ * more than a cosmetic difference: on a database without that migration,
+ * publish_products() has no deletion in its WHERE clause, so a row whose only
+ * change is the delete mark cannot be published at all. Counting it as
+ * pending leaves Objavi stuck on a number that never goes down and a publish
+ * that honestly reports 0 of N — which is exactly what it did. */
+let gated = false;
 let covers = new Map();     // slug -> { media_id }
 let facets = { format: new Set(), genre: new Set(), condition: new Set() };
 
@@ -71,6 +82,7 @@ async function loadBase() {
 
 async function loadEdits() {
   const rows = await api.fetchProductEdits();
+  gated = rows.some((r) => 'published_deleted' in r);
   edits = new Map(rows.map((r) => [r.slug, r]));
   const imgs = await api.fetchProductImages();
   covers = new Map(imgs.map((r) => [r.slug, r]));
@@ -96,16 +108,19 @@ function pending(slug) {
   const row = edits.get(slug);
   if (!row) return false;
 
-  // A deletion is a draft like any other: `deleted` is what was asked for,
-  // `published_deleted` is what the site has acted on. While they disagree
-  // there is something to publish — and that is also what makes the deletion
-  // undoable right up to the moment Objavi is pressed.
-  if (!!row.deleted !== !!row.published_deleted) return true;
+  if (gated) {
+    // A deletion is a draft like any other: `deleted` is what was asked for,
+    // `published_deleted` is what the site has acted on. While they disagree
+    // there is something to publish — and that is also what makes the
+    // deletion undoable right up to the moment Objavi is pressed.
+    if (!!row.deleted !== !!row.published_deleted) return true;
+  }
 
-  // Already published as deleted. The patch underneath it no longer matters:
-  // the product has no page to apply it to. Counting it would leave the row
-  // in the tally for ever, which is how a publish with nothing else to do
-  // ended up reporting that the database had refused everything.
+  // Deleted, and nothing further to publish about it. On a gated database
+  // the deletion has been published; on an older one the build applies the
+  // flag by itself. Either way the patch underneath no longer matters — the
+  // product has no page to apply it to — and counting the row would leave it
+  // in the tally for ever.
   if (row.deleted) return false;
 
   return JSON.stringify(row.draft ?? {}) !== JSON.stringify(row.published ?? null);
@@ -287,8 +302,10 @@ function row(slug, repaint) {
 
   // Two separate facts, and the badge has to say which: `deleted` is what was
   // asked for, `published_deleted` is what the site has actually acted on.
+  // On a database without 0004 there is only one fact to report: the build
+  // applies the mark on its own, so there is no waiting and no undoing.
   const marked = !!er?.deleted;
-  const gone = !!er?.published_deleted;
+  const gone = gated ? !!er?.published_deleted : marked;
 
   const badges = [
     marked && !gone && ['pill--draft', 'brisanje čeka objavu'],
@@ -562,9 +579,11 @@ function openEditor(slug, afterSave) {
             await api.markProductDeleted(slug, false);
             await loadEdits();
             $('#modal').hidden = true;
-            toast(er.published_deleted
-              ? 'Brisanje otkazano. Objavite da se proizvod vrati na sajt.'
-              : 'Brisanje otkazano. Proizvod nije ni sklonjen sa sajta.', 'ok');
+            toast(!gated
+              ? 'Brisanje otkazano. Proizvod se vraća pri sledećoj izgradnji sajta.'
+              : er.published_deleted
+                ? 'Brisanje otkazano. Objavite da se proizvod vrati na sajt.'
+                : 'Brisanje otkazano. Proizvod nije ni sklonjen sa sajta.', 'ok');
             afterSave?.();
           } catch (err) { toast(err.message, 'err'); }
         },
@@ -574,9 +593,13 @@ function openEditor(slug, afterSave) {
         onclick: async () => {
           const ok = await confirmDialog({
             title: 'Brisanje proizvoda',
-            body: `Obrisati „${label(p)}”? Stranica ostaje na sajtu dok ne kliknete Objavi, `
-              + 'a do tada se brisanje može otkazati. Posle objave adresa /proizvod/'
-              + slug + '/ više neće postojati.',
+            body: `Obrisati „${label(p)}”? `
+              + (gated
+                ? 'Stranica ostaje na sajtu dok ne kliknete Objavi, a do tada se brisanje '
+                  + 'može otkazati. Posle objave adresa /proizvod/' + slug + '/ više neće postojati.'
+                : 'Stranica nestaje pri sledećoj izgradnji sajta, i bez objavljivanja — '
+                  + 'migracija 0004 nije pokrenuta. Adresa /proizvod/' + slug
+                  + '/ više neće postojati.'),
             confirmLabel: 'Obriši', danger: true,
           });
           if (!ok) return;
