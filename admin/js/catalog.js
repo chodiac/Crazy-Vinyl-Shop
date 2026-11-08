@@ -96,11 +96,16 @@ function pending(slug) {
   const row = edits.get(slug);
   if (!row) return false;
 
-  // A row marked deleted is already acted on: tools/content.py reads the flag
-  // straight off the row, so the next build drops the slug whether or not
-  // anything was published. Counting it as outstanding meant it stayed in the
-  // tally for ever, and a publish that had nothing else to do reported that
-  // the database had refused everything.
+  // A deletion is a draft like any other: `deleted` is what was asked for,
+  // `published_deleted` is what the site has acted on. While they disagree
+  // there is something to publish — and that is also what makes the deletion
+  // undoable right up to the moment Objavi is pressed.
+  if (!!row.deleted !== !!row.published_deleted) return true;
+
+  // Already published as deleted. The patch underneath it no longer matters:
+  // the product has no page to apply it to. Counting it would leave the row
+  // in the tally for ever, which is how a publish with nothing else to do
+  // ended up reporting that the database had refused everything.
   if (row.deleted) return false;
 
   return JSON.stringify(row.draft ?? {}) !== JSON.stringify(row.published ?? null);
@@ -235,7 +240,7 @@ export async function renderCatalogView(host) {
         if (selVis.value === 'visible' && p.hidden) return false;
         if (selVis.value === 'featured' && !p.featured) return false;
         if (selVis.value === 'pending' && !pending(slug)) return false;
-        if (selVis.value === 'deleted' && !row?.deleted) return false;
+        if (selVis.value === 'deleted' && !(row?.deleted || row?.published_deleted)) return false;
         return true;
       });
   }
@@ -280,16 +285,23 @@ function row(slug, repaint) {
   const cover = covers.get(slug);
   const media = cover ? mediaById(cover.media_id) : null;
 
+  // Two separate facts, and the badge has to say which: `deleted` is what was
+  // asked for, `published_deleted` is what the site has actually acted on.
+  const marked = !!er?.deleted;
+  const gone = !!er?.published_deleted;
+
   const badges = [
-    er?.deleted && ['pill--hidden', 'za brisanje'],
-    pending(slug) && !er?.deleted && ['pill--draft', 'nacrt'],
+    marked && !gone && ['pill--draft', 'brisanje čeka objavu'],
+    marked && gone && ['pill--hidden', 'obrisano'],
+    !marked && gone && ['pill--draft', 'vraćanje čeka objavu'],
+    pending(slug) && !marked && !gone && ['pill--draft', 'nacrt'],
     p.hidden && ['pill--hidden', 'skriveno'],
     p.featured && ['pill--live', 'istaknuto'],
     !p.available && ['', 'rasprodato'],
     p.onSale && p.salePrice && ['pill--draft', 'sniženo'],
   ].filter(Boolean);
 
-  return el('div', { class: `item${p.hidden || er?.deleted ? ' is-hidden' : ''}` },
+  return el('div', { class: `item${p.hidden || marked || gone ? ' is-hidden' : ''}` },
     el('div', { class: 'img-slot' },
       media
         ? el('img', { class: 'img-slot__preview', src: thumbUrl(media, 160), alt: '', loading: 'lazy' })
@@ -536,27 +548,48 @@ function openEditor(slug, afterSave) {
 
   const foot = clear($('#modalFoot'));
 
+  /* --- delete, and taking it back -------------------------------------
+     Deletion is a draft state: it is written to `deleted`, the build reads
+     `published_deleted`, and publishing is what moves one to the other. That
+     is what makes the second button below possible — before, the mark was
+     applied by the next build regardless, so there was nothing to undo. */
   if (!isNew) {
-    foot.append(el('button', {
-      class: 'btn btn--danger', type: 'button',
-      onclick: async () => {
-        const ok = await confirmDialog({
-          title: 'Brisanje proizvoda',
-          body: `Obrisati „${label(p)}”? Stranica ostaje na sajtu dok ne kliknete Objavi. `
-            + 'Posle objave adresa /proizvod/' + slug + '/ više neće postojati.',
-          confirmLabel: 'Obriši', danger: true,
-        });
-        if (!ok) return;
-        try {
-          if (!edits.has(slug)) await api.saveProductDraft(slug, {}, { origin });
-          await api.markProductDeleted(slug, true);
-          await loadEdits();
-          $('#modal').hidden = true;
-          toast('Označeno za brisanje. Objavite da nestane sa sajta.', 'ok');
-          afterSave?.();
-        } catch (err) { toast(err.message, 'err'); }
-      },
-    }, 'Obriši'));
+    foot.append(er?.deleted
+      ? el('button', {
+        class: 'btn', type: 'button',
+        onclick: async () => {
+          try {
+            await api.markProductDeleted(slug, false);
+            await loadEdits();
+            $('#modal').hidden = true;
+            toast(er.published_deleted
+              ? 'Brisanje otkazano. Objavite da se proizvod vrati na sajt.'
+              : 'Brisanje otkazano. Proizvod nije ni sklonjen sa sajta.', 'ok');
+            afterSave?.();
+          } catch (err) { toast(err.message, 'err'); }
+        },
+      }, 'Otkaži brisanje')
+      : el('button', {
+        class: 'btn btn--danger', type: 'button',
+        onclick: async () => {
+          const ok = await confirmDialog({
+            title: 'Brisanje proizvoda',
+            body: `Obrisati „${label(p)}”? Stranica ostaje na sajtu dok ne kliknete Objavi, `
+              + 'a do tada se brisanje može otkazati. Posle objave adresa /proizvod/'
+              + slug + '/ više neće postojati.',
+            confirmLabel: 'Obriši', danger: true,
+          });
+          if (!ok) return;
+          try {
+            if (!edits.has(slug)) await api.saveProductDraft(slug, {}, { origin });
+            await api.markProductDeleted(slug, true);
+            await loadEdits();
+            $('#modal').hidden = true;
+            toast('Označeno za brisanje. Objavite da nestane sa sajta.', 'ok');
+            afterSave?.();
+          } catch (err) { toast(err.message, 'err'); }
+        },
+      }, 'Obriši'));
   }
 
   foot.append(

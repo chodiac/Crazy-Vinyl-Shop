@@ -158,7 +158,11 @@ export async function uploadMedia(file, { width, height, onProgress } = {}) {
 
 export const fetchProductEdits = () =>
   sb.from('products')
-    .select('slug,origin,draft,published,deleted,draft_updated_at,published_at')
+    // `*` rather than a column list, so this file and the database can be
+    // upgraded in either order: naming published_deleted here would make the
+    // whole section fail with a 400 on a project where 0004 has not been run
+    // yet. The row is small — a patch, not a product.
+    .select('*')
     .then(unwrap);
 
 export async function saveProductDraft(slug, patch, { origin = 'catalog' } = {}) {
@@ -172,7 +176,13 @@ export async function saveProductDraft(slug, patch, { origin = 'catalog' } = {})
   }, { onConflict: 'slug' }).select().single().then(unwrap);
 }
 
-/** Deleting is a draft state too: the site keeps the page until it is published. */
+/**
+ * Marks a product for deletion, or takes the mark back.
+ *
+ * This writes the draft flag only. `published_deleted` is set by
+ * publish_products(), and that is the column the build reads — so the page
+ * stays on the site until Objavi, and until then this is reversible.
+ */
 export async function markProductDeleted(slug, deleted = true) {
   const session = await getSession();
   return sb.from('products').update({

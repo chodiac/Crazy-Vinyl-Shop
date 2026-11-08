@@ -119,7 +119,8 @@ ostalo i dalje dolazi iz kataloga. Zato ne postoje dve verzije istog podatka.
 
 Pretraga radi po izvođaču, nazivu i slugu. Iznad liste su i četiri filtera:
 format, žanr, stanje (na stanju / rasprodato / na sniženju) i vidljivost
-(prikazano / skriveno / istaknuto / **ima nacrt** / za brisanje).
+(prikazano / skriveno / istaknuto / **ima nacrt** / za brisanje — gde su i
+brisanja koja čekaju objavu i ona koja su već objavljena).
 
 Filter „ima nacrt" je koristan pred objavu — pokazuje tačno šta čeka.
 
@@ -153,7 +154,13 @@ Kad uključite **Na sniženju**, na stranici se *Cena* prikazuje precrtano, a
 u sitemap-u. Ostaje kod vas i vraća se jednim klikom.
 
 **Obriši** — traži potvrdu i označava proizvod za brisanje. **Stranica ostaje
-na sajtu dok ne kliknete Objavi.** Posle objave adresa više ne postoji.
+na sajtu dok ne kliknete Objavi.** Do tada u listi stoji oznaka „brisanje čeka
+objavu", a u proizvodu se pojavljuje dugme **Otkaži brisanje** — jedan klik i
+ništa se nije dogodilo.
+
+Posle objave adresa `/proizvod/<slug>/` više ne postoji i oznaka postaje
+„obrisano". I tada se **Otkaži brisanje** može kliknuti: proizvod se vraća na
+sajt pri sledećoj objavi.
 
 Ako niste sigurni — sakrijte, nemojte brisati.
 

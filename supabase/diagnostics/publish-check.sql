@@ -19,11 +19,17 @@
 -- 1 ── the edited products, and whether the publish actually took.
 --      published_at NULL, or draft <> published, means the copy did not
 --      happen: the problem is in publish_products() or its permissions.
+--      For a deletion the pair to read is deleted / published_deleted: equal
+--      means the site has acted on it, different means it is still waiting
+--      for Objavi. (published_deleted arrives with 0004; if this query errors
+--      on that column, that migration has not been run.)
 select
   slug,
   origin,
   deleted,
-  (published is not distinct from draft) as draft_equals_published,
+  published_deleted,
+  (published is not distinct from draft
+   and deleted is not distinct from published_deleted) as draft_equals_published,
   published_at,
   draft_updated_at,
   draft,

@@ -45,7 +45,18 @@ admin panel (browser)  ──write──▶  Supabase: draft
    editing. Until it is run the Proizvodi section reports an error and the
    build quietly falls back to `data/products.json`, so nothing breaks.
 
-Both files are safe to run again — every statement is `create … if not exists`,
+5. **SQL Editor** → `supabase/migrations/0004_delete_via_publish.sql`. This
+   puts product deletion behind the Objavi button, where the panel always
+   claimed it was. It adds `products.published_deleted` — the column the build
+   reads — and backfills it for deletions that have already gone out, so the
+   live site does not change when you run it.
+
+   On a project that has `0003` but not this, `tools/content.py` prints
+   `kolona published_deleted ne postoji` and keeps the old behaviour: a
+   deletion applies on the next build without being published. Nothing fails,
+   but the mark is not reversible until the migration is run.
+
+All four files are safe to run again — every statement is `create … if not exists`,
 `create or replace`, `drop … if exists` or `on conflict do update`. If you ran
 an earlier copy of `0001_cms.sql`, re-run it: the first version left the table
 privileges to the project defaults, and on a project that does not apply them

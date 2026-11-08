@@ -186,18 +186,32 @@ def merge_products(media_urls):
     # Optional on purpose: before 0003_products.sql has been run the table
     # does not exist, and a build that died over that would take the live site
     # down for a migration nobody had got to yet.
-    rows = api('products?select=slug,origin,published,deleted'
-               '&published_at=not.is.null', optional=True)
+    #
+    # `select=*` rather than a column list for the same reason: it cannot 400
+    # over a column a migration has not added yet, so this file and the
+    # database can be upgraded in either order.
+    rows = api('products?select=*&published_at=not.is.null', optional=True)
     if rows is None:
         print('[content] proizvodi: tabela ne postoji — koristi se data/products.json')
         return base
+
+    # Deletion is a draft state like everything else here: `deleted` is what
+    # the editor asked for, `published_deleted` is what the last publish
+    # accepted, and only the second one may take a page off the site. Reading
+    # `deleted` directly — which this did — removed products that had never
+    # been published, contradicting the panel and the owner's guide.
+    gated = bool(rows) and 'published_deleted' in rows[0]
+    if rows and not gated:
+        print('[content] proizvodi: kolona published_deleted ne postoji — '
+              'migracija 0004 nije pokrenuta, brisanje se primenjuje bez objave')
 
     changed = created = removed = 0
     for row in rows:
         slug = row['slug']
         patch = row.get('published') or {}
 
-        if row.get('deleted'):
+        gone = row.get('published_deleted') if gated else row.get('deleted')
+        if gone:
             if by_slug.pop(slug, None) is not None:
                 removed += 1
             continue
