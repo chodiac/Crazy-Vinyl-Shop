@@ -83,8 +83,12 @@ async function loadEdits() {
 function effective(slug) {
   const row = edits.get(slug);
   const b = base.get(slug) || {};
-  if (!row) return { ...b };
-  return { ...b, ...(row.draft || {}) };
+  // The slug goes in first so the record always carries one. A title deleted
+  // from the catalogue leaves its row behind, and that row's patch holds only
+  // the fields that were edited — no artist, no title, no slug. Without this
+  // such a record had no name at all, and anything that asked it for one got
+  // undefined back.
+  return { slug, ...b, ...(row?.draft || {}) };
 }
 
 /** Is this product's draft ahead of what the site is serving? */
@@ -153,7 +157,11 @@ function diffPatch(slug, edited, origin) {
   return patch;
 }
 
-const label = (p) => [p.artist, p.title].filter(Boolean).join(' — ') || p.slug;
+// Never undefined: matches() lowercases this for every row the moment a
+// search has any text in it, and one undefined threw the whole filter away —
+// leaving the full list on screen and search looking dead.
+const label = (p) => [p.artist, p.title].filter(Boolean).join(' — ')
+  || p.slug || '(bez naziva)';
 
 const slugify = (s) => String(s || '').toLowerCase()
   .normalize('NFD').replace(/[̀-ͯ]/g, '')
